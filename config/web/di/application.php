@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Shared\Interface\Http\Middleware\CorsMiddleware;
 use App\Web\NotFound\NotFoundHandler;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
 use Yiisoft\Definitions\DynamicReference;
@@ -43,6 +44,17 @@ return [
         '__construct()' => [
             Reference::to(HydratorAttributeParametersResolver::class),
             Reference::to(RequestInputParametersResolver::class),
+        ],
+    ],
+
+    CorsMiddleware::class => [
+        'class' => CorsMiddleware::class,
+        '__construct()' => [
+            'allowedOrigins' => [
+                'http://localhost',
+                'http://localhost:5173',
+            ],
+            'allowCredentials' => true,
         ],
     ],
 ];
