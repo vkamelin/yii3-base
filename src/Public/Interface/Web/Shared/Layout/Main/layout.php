@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Web\Shared\Layout\Main\MainAsset;
+use App\Public\Interface\Web\Shared\Layout\Main\MainAsset;
 use Yiisoft\Html\Html;
 
 /**

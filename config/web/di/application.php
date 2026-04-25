@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Shared\Interface\Http\Middleware\CorsMiddleware;
-use App\Web\NotFound\NotFoundHandler;
+use App\Public\Interface\Web\NotFound\NotFoundHandler;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
 use Yiisoft\Definitions\DynamicReference;
 use Yiisoft\Definitions\Reference;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Web\Shared\Layout\Main;
+namespace App\Public\Interface\Web\Shared\Layout\Main;
 
 use Yiisoft\Assets\AssetBundle;
 
