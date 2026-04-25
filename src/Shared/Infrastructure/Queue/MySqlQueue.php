@@ -10,6 +10,7 @@ use Yiisoft\Db\Connection\ConnectionInterface;
 
 use function is_array;
 use function is_string;
+use function gethostname;
 use function json_encode;
 use function min;
 use function sprintf;
@@ -23,6 +24,7 @@ use const JSON_THROW_ON_ERROR;
 final class MySqlQueue implements QueueWorkerStorageInterface
 {
     private const TABLE_NAME = '{{%queue_jobs}}';
+    private const DEFAULT_QUEUE = 'default';
     private const STATUS_PENDING = 'pending';
     private const STATUS_RESERVED = 'reserved';
     private const STATUS_DONE = 'done';
@@ -73,6 +75,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                 [
                     'status' => self::STATUS_DONE,
                     'reserved_at' => null,
+                    'reserved_by' => null,
                     'updated_at' => $now,
                 ],
                 ['id' => $job->id->toBinary()],
@@ -99,6 +102,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                     'status' => self::STATUS_PENDING,
                     'available_at' => $availableAt,
                     'reserved_at' => null,
+                    'reserved_by' => null,
                     'updated_at' => $now,
                     'last_error' => $this->truncateError($lastError),
                 ],
@@ -124,6 +128,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                     'status' => self::STATUS_FAILED,
                     'failed_at' => $now,
                     'reserved_at' => null,
+                    'reserved_by' => null,
                     'updated_at' => $now,
                     'last_error' => $this->truncateError($lastError),
                 ],
@@ -144,12 +149,13 @@ final class MySqlQueue implements QueueWorkerStorageInterface
             $now = $this->now();
             $suffix = $useSkipLocked ? ' FOR UPDATE SKIP LOCKED' : ' FOR UPDATE';
 
-            $sql = 'SELECT id, type, payload, attempts, max_attempts FROM ' . self::TABLE_NAME
-                . ' WHERE status = :status AND available_at <= :available_at'
+            $sql = 'SELECT id, job_type, payload, attempts, max_attempts FROM ' . self::TABLE_NAME
+                . ' WHERE queue = :queue AND status = :status AND available_at <= :available_at'
                 . ' ORDER BY available_at ASC, created_at ASC LIMIT 1'
                 . $suffix;
 
             $row = $db->createCommand($sql, [
+                ':queue' => self::DEFAULT_QUEUE,
                 ':status' => self::STATUS_PENDING,
                 ':available_at' => $now,
             ])->queryOne();
@@ -168,9 +174,10 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                     'status' => self::STATUS_RESERVED,
                     'attempts' => $attempt,
                     'reserved_at' => $now,
+                    'reserved_by' => $this->workerName(),
                     'updated_at' => $now,
                 ],
-                ['id' => $idBinary, 'status' => self::STATUS_PENDING],
+                ['id' => $idBinary, 'queue' => self::DEFAULT_QUEUE, 'status' => self::STATUS_PENDING],
             )->execute();
 
             if ($affectedRows !== 1) {
@@ -210,13 +217,15 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                 self::TABLE_NAME,
                 [
                     'id' => $id->toBinary(),
-                    'type' => $job->type(),
+                    'queue' => self::DEFAULT_QUEUE,
+                    'job_type' => $job->type(),
                     'payload' => $this->serializer->serialize($job),
                     'status' => self::STATUS_PENDING,
                     'attempts' => 0,
                     'max_attempts' => $maxAttempts,
                     'available_at' => $availableAt,
                     'reserved_at' => null,
+                    'reserved_by' => null,
                     'failed_at' => null,
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -256,7 +265,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
      */
     private function typeFromRow(array $row): string
     {
-        $type = $row['type'] ?? null;
+        $type = $row['job_type'] ?? null;
         if (!is_string($type) || trim($type) === '') {
             throw new InvalidJobPayloadException('Queue row does not contain valid job type.');
         }
@@ -290,5 +299,11 @@ final class MySqlQueue implements QueueWorkerStorageInterface
     private function isSkipLockedError(\Throwable $e): bool
     {
         return str_contains($e->getMessage(), 'SKIP LOCKED');
+    }
+
+    private function workerName(): string
+    {
+        $name = gethostname();
+        return is_string($name) && trim($name) !== '' ? $name : 'worker';
     }
 }

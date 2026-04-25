@@ -44,12 +44,13 @@ return [
     ],
 
     'yiisoft/db-migration' => [
-        'newMigrationNamespace' => '',
-        'newMigrationPath' => dirname(__DIR__, 2) . '/src/Console/Migration',
-        'sourceNamespaces' => [],
-        'sourcePaths' => [
-            dirname(__DIR__, 2) . '/src/Console/Migration',
+        'sourceNamespaces' => [
+            'App\\User\\Infrastructure\\Migration',
+            'App\\Auth\\Infrastructure\\Migration',
+            'App\\Rbac\\Infrastructure\\Migration',
+            'App\\Shared\\Infrastructure\\Migration',
         ],
+        'newMigrationNamespace' => 'App\\Shared\\Infrastructure\\Migration',
     ],
 
     'yiisoft/aliases' => [

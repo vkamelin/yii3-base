@@ -6,6 +6,6 @@ return [
     // Console commands will be registered here.
     //
     // Future:
-    // - seed/run
-    // - queue/work
+    // - seed:run
+    // - queue:work
 ];

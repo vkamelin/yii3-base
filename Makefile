@@ -83,12 +83,36 @@ endif
 
 ifeq ($(PRIMARY_GOAL),migrate)
 migrate: ## Run database migrations.
-	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate/up --interactive=0
+	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate:up --interactive=0
+endif
+
+ifeq ($(PRIMARY_GOAL),migration-user)
+migration-user: ## Create migration in User module namespace.
+	$(DOCKER_COMPOSE_DEV) exec app mkdir -p /app/src/User/Infrastructure/Migration
+	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate:create $(CLI_ARGS) --namespace=App\\User\\Infrastructure\\Migration
+endif
+
+ifeq ($(PRIMARY_GOAL),migration-auth)
+migration-auth: ## Create migration in Auth module namespace.
+	$(DOCKER_COMPOSE_DEV) exec app mkdir -p /app/src/Auth/Infrastructure/Migration
+	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate:create $(CLI_ARGS) --namespace=App\\Auth\\Infrastructure\\Migration
+endif
+
+ifeq ($(PRIMARY_GOAL),migration-rbac)
+migration-rbac: ## Create migration in RBAC module namespace.
+	$(DOCKER_COMPOSE_DEV) exec app mkdir -p /app/src/Rbac/Infrastructure/Migration
+	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate:create $(CLI_ARGS) --namespace=App\\Rbac\\Infrastructure\\Migration
+endif
+
+ifeq ($(PRIMARY_GOAL),migration-shared)
+migration-shared: ## Create migration in Shared module namespace.
+	$(DOCKER_COMPOSE_DEV) exec app mkdir -p /app/src/Shared/Infrastructure/Migration
+	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate:create $(CLI_ARGS) --namespace=App\\Shared\\Infrastructure\\Migration
 endif
 
 ifeq ($(PRIMARY_GOAL),seed)
 seed: ## Run seed command.
-	$(DOCKER_COMPOSE_DEV) exec app ./yii seed/run
+	$(DOCKER_COMPOSE_DEV) exec app ./yii seed:run
 endif
 
 ifeq ($(PRIMARY_GOAL),queue)
