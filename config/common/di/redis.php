@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Predis\Client;
 use Predis\ClientInterface;
+use App\Shared\Interface\Http\RateLimit\RateLimiterInterface;
+use App\Shared\Infrastructure\Http\RateLimit\RedisRateLimiter;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Cache\Redis\RedisCache;
 
@@ -31,4 +33,6 @@ return [
     },
 
     CacheInterface::class => static fn (ClientInterface $redis): RedisCache => new RedisCache($redis),
+
+    RateLimiterInterface::class => RedisRateLimiter::class,
 ];

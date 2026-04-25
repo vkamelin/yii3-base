@@ -43,6 +43,27 @@ return [
         'jobs' => [],
     ],
 
+    'middleware' => [
+        'api' => [
+            'prefixes' => ['/api', '/api/'],
+            'publicPaths' => ['/api/v1/auth/login'],
+            'rateLimit' => [
+                'limit' => (int) ($_ENV['API_RATE_LIMIT'] ?? 60),
+                'windowSeconds' => (int) ($_ENV['API_RATE_LIMIT_WINDOW'] ?? 60),
+                'keyPrefix' => $_ENV['API_RATE_LIMIT_PREFIX'] ?? 'rate_limit:api:',
+            ],
+        ],
+        'web' => [
+            'protectedPrefixes' => ['/dashboard'],
+        ],
+        'rbac' => [
+            'webPermissionsByPrefix' => [
+                '/dashboard' => 'dashboard.view',
+            ],
+            'apiPermissionsByPrefix' => [],
+        ],
+    ],
+
     'yiisoft/db-migration' => [
         'sourceNamespaces' => [
             'App\\User\\Infrastructure\\Migration',
