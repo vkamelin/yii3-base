@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Shared\Interface\Http\Middleware\CorsMiddleware;
-use Yiisoft\Csrf\CsrfTokenMiddleware;
+use App\Shared\Interface\Http\Middleware\SelectiveCsrfTokenMiddleware;
 use Yiisoft\Definitions\Reference;
 use Yiisoft\ErrorHandler\Middleware\ErrorCatcher;
 use Yiisoft\Input\Http\HydratorAttributeParametersResolver;
@@ -30,7 +30,7 @@ return [
             [
                 ErrorCatcher::class,
                 SessionMiddleware::class,
-                CsrfTokenMiddleware::class,
+                SelectiveCsrfTokenMiddleware::class,
                 RequestCatcherMiddleware::class,
                 Router::class,
             ],

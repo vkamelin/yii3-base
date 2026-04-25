@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Auth\Domain\Service\PasswordHasherInterface;
+use App\Auth\Domain\ValueObject\PlainPassword;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -11,7 +13,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Security\PasswordHasher;
 use Yiisoft\Yii\Console\ExitCode;
 
 use function is_array;
@@ -141,7 +142,7 @@ final class SeedCommand extends Command
 
     public function __construct(
         private readonly ConnectionInterface $db,
-        private readonly PasswordHasher $passwordHasher,
+        private readonly PasswordHasherInterface $passwordHasher,
     ) {
         parent::__construct();
     }
@@ -325,7 +326,7 @@ final class SeedCommand extends Command
         if ($existing === null) {
             $db->createCommand()->insert('user_credentials', [
                 'user_id' => $adminUserId,
-                'password_hash' => $this->passwordHasher->hash(self::ADMIN_PASSWORD),
+                'password_hash' => $this->passwordHasher->hash(PlainPassword::fromString(self::ADMIN_PASSWORD))->value(),
                 'password_changed_at' => $shouldReset ? $now : null,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -340,7 +341,7 @@ final class SeedCommand extends Command
         $db->createCommand()->update(
             'user_credentials',
             [
-                'password_hash' => $this->passwordHasher->hash(self::ADMIN_PASSWORD),
+                'password_hash' => $this->passwordHasher->hash(PlainPassword::fromString(self::ADMIN_PASSWORD))->value(),
                 'password_changed_at' => $now,
                 'updated_at' => $now,
             ],
