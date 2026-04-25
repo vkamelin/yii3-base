@@ -9,9 +9,9 @@ use App\Shared\ApplicationParams;
 return [
     ApplicationParams::class => [
         '__construct()' => [
-            'name' => $params['application']['name'],
-            'charset' => $params['application']['charset'],
-            'locale' => $params['application']['locale'],
+            'name' => $params['app']['name'],
+            'charset' => $params['app']['charset'],
+            'locale' => $params['app']['locale'],
         ],
     ],
 ];

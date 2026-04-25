@@ -11,22 +11,30 @@ use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 
 return [
-    'application' => require __DIR__ . '/application.php',
+    'app' => [
+        'name' => $_ENV['APP_NAME'] ?? 'Yii3 Base',
+        'charset' => 'UTF-8',
+        'locale' => $_ENV['APP_LOCALE'] ?? 'ru-RU',
+        'runtimePath' => $_ENV['APP_RUNTIME_PATH'] ?? dirname(__DIR__, 2) . '/runtime',
+    ],
 
-    'database' => [
-        'host' => getenv('DB_HOST') ?: 'mysql',
-        'port' => (int) (getenv('DB_PORT') ?: 3306),
-        'name' => getenv('DB_NAME') ?: 'app',
-        'username' => getenv('DB_USER') ?: 'app',
-        'password' => getenv('DB_PASSWORD') ?: 'app',
-        'charset' => 'utf8mb4',
-        'tablePrefix' => '',
+    'db' => [
+        'dsn' => sprintf(
+            'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+            $_ENV['DB_HOST'] ?? 'mysql',
+            $_ENV['DB_PORT'] ?? '3306',
+            $_ENV['DB_NAME'] ?? 'app',
+        ),
+        'username' => $_ENV['DB_USER'] ?? 'app',
+        'password' => $_ENV['DB_PASSWORD'] ?? 'app',
     ],
 
     'redis' => [
-        'host' => getenv('REDIS_HOST') ?: 'redis',
-        'port' => (int) (getenv('REDIS_PORT') ?: 6379),
-        'password' => getenv('REDIS_PASSWORD') ?: 'redis',
+        'host' => $_ENV['REDIS_HOST'] ?? 'redis',
+        'port' => (int) ($_ENV['REDIS_PORT'] ?? 6379),
+        'password' => $_ENV['REDIS_PASSWORD'] ?? 'redis',
+        'database' => (int) ($_ENV['REDIS_DATABASE'] ?? 0),
+        'timeout' => (float) ($_ENV['REDIS_TIMEOUT'] ?? 2.5),
     ],
 
     'queue' => [
