@@ -13,8 +13,8 @@ services:
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
-      QUEUE_WORKER_1_COMMAND: ${QUEUE_WORKER_1_COMMAND:-php ./yii queue/listen}
-      QUEUE_WORKER_2_COMMAND: ${QUEUE_WORKER_2_COMMAND:-php ./yii queue/listen --queue=priority}
+      QUEUE_WORKER_1_COMMAND: ${QUEUE_WORKER_1_COMMAND:-php /app/yii queue:work --sleep=3 --queue=mysql}
+      QUEUE_WORKER_2_COMMAND: ${QUEUE_WORKER_2_COMMAND:-php /app/yii queue:work --sleep=3 --queue=mysql}
     depends_on:
       mysql:
         condition: service_healthy

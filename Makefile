@@ -92,8 +92,8 @@ seed: ## Run seed command.
 endif
 
 ifeq ($(PRIMARY_GOAL),queue)
-queue: ## Start queue workers group in Supervisor.
-	$(SUPERVISORCTL) start workers:*
+queue: ## Run queue worker in foreground.
+	$(DOCKER_COMPOSE_DEV) exec app php yii queue:work
 endif
 
 ifeq ($(PRIMARY_GOAL),supervisor-status)

@@ -13,6 +13,37 @@ use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 return [
     'application' => require __DIR__ . '/application.php',
 
+    'database' => [
+        'host' => getenv('DB_HOST') ?: 'mysql',
+        'port' => (int) (getenv('DB_PORT') ?: 3306),
+        'name' => getenv('DB_NAME') ?: 'app',
+        'username' => getenv('DB_USER') ?: 'app',
+        'password' => getenv('DB_PASSWORD') ?: 'app',
+        'charset' => 'utf8mb4',
+        'tablePrefix' => '',
+    ],
+
+    'redis' => [
+        'host' => getenv('REDIS_HOST') ?: 'redis',
+        'port' => (int) (getenv('REDIS_PORT') ?: 6379),
+        'password' => getenv('REDIS_PASSWORD') ?: 'redis',
+    ],
+
+    'queue' => [
+        'defaultMaxAttempts' => 3,
+        'redisKeyPrefix' => 'queue:default',
+        'jobs' => [],
+    ],
+
+    'yiisoft/db-migration' => [
+        'newMigrationNamespace' => '',
+        'newMigrationPath' => dirname(__DIR__, 2) . '/src/Console/Migration',
+        'sourceNamespaces' => [],
+        'sourcePaths' => [
+            dirname(__DIR__, 2) . '/src/Console/Migration',
+        ],
+    ],
+
     'yiisoft/aliases' => [
         'aliases' => require __DIR__ . '/aliases.php',
     ],
