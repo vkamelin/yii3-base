@@ -6,6 +6,7 @@
 !/config
 !/public
 !/src
+!/docker
 !autoload.php
 !yii
 !composer.json

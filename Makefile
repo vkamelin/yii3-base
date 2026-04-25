@@ -20,6 +20,7 @@ endif
 export COMPOSE_PROJECT_NAME=${STACK_NAME}
 DOCKER_COMPOSE_DEV := docker compose -f docker/compose.yml -f docker/dev/compose.yml
 DOCKER_COMPOSE_TEST := docker compose -f docker/compose.yml -f docker/test/compose.yml
+SUPERVISORCTL := $(DOCKER_COMPOSE_DEV) exec app supervisorctl
 
 #
 # Development
@@ -61,23 +62,83 @@ endif
 
 ifeq ($(PRIMARY_GOAL),yii)
 yii: ## Execute Yii command.
-	$(DOCKER_COMPOSE_DEV) run --rm app ./yii $(CLI_ARGS)
+	$(DOCKER_COMPOSE_DEV) exec app ./yii $(CLI_ARGS)
 .PHONY: yii
 endif
 
 ifeq ($(PRIMARY_GOAL),composer)
 composer: ## Run Composer.
-	$(DOCKER_COMPOSE_DEV) run --rm app composer $(CLI_ARGS)
+	$(DOCKER_COMPOSE_DEV) exec app composer $(CLI_ARGS)
 endif
 
 ifeq ($(PRIMARY_GOAL),rector)
 rector: ## Run Rector.
-	$(DOCKER_COMPOSE_DEV) run --rm app ./vendor/bin/rector $(CLI_ARGS)
+	$(DOCKER_COMPOSE_DEV) exec app ./vendor/bin/rector $(CLI_ARGS)
 endif
 
 ifeq ($(PRIMARY_GOAL),cs-fix)
 cs-fix: ## Run PHP CS Fixer.
-	$(DOCKER_COMPOSE_DEV) run --rm app ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --diff
+	$(DOCKER_COMPOSE_DEV) exec app ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --diff
+endif
+
+ifeq ($(PRIMARY_GOAL),migrate)
+migrate: ## Run database migrations.
+	$(DOCKER_COMPOSE_DEV) exec app ./yii migrate/up --interactive=0
+endif
+
+ifeq ($(PRIMARY_GOAL),seed)
+seed: ## Run seed command.
+	$(DOCKER_COMPOSE_DEV) exec app ./yii seed/run
+endif
+
+ifeq ($(PRIMARY_GOAL),queue)
+queue: ## Start queue workers group in Supervisor.
+	$(SUPERVISORCTL) start workers:*
+endif
+
+ifeq ($(PRIMARY_GOAL),supervisor-status)
+supervisor-status: ## Show Supervisor programs status.
+	$(SUPERVISORCTL) status
+endif
+
+ifeq ($(PRIMARY_GOAL),supervisor-reread)
+supervisor-reread: ## Reread Supervisor config.
+	$(SUPERVISORCTL) reread
+endif
+
+ifeq ($(PRIMARY_GOAL),supervisor-update)
+supervisor-update: ## Update Supervisor programs from reread config.
+	$(SUPERVISORCTL) update
+endif
+
+ifeq ($(PRIMARY_GOAL),supervisor-restart)
+supervisor-restart: ## Restart all Supervisor programs.
+	$(SUPERVISORCTL) restart all
+endif
+
+ifeq ($(PRIMARY_GOAL),workers-status)
+workers-status: ## Show workers group status.
+	$(SUPERVISORCTL) status workers:*
+endif
+
+ifeq ($(PRIMARY_GOAL),workers-start)
+workers-start: ## Start workers group only.
+	$(SUPERVISORCTL) start workers:*
+endif
+
+ifeq ($(PRIMARY_GOAL),workers-stop)
+workers-stop: ## Stop workers group only.
+	$(SUPERVISORCTL) stop workers:*
+endif
+
+ifeq ($(PRIMARY_GOAL),workers-restart)
+workers-restart: ## Restart workers group only.
+	$(SUPERVISORCTL) restart workers:*
+endif
+
+ifeq ($(PRIMARY_GOAL),queue-restart)
+queue-restart: ## Alias for workers restart.
+	$(SUPERVISORCTL) restart workers:*
 endif
 
 #
@@ -101,12 +162,12 @@ endif
 
 ifeq ($(PRIMARY_GOAL),psalm)
 psalm: ## Run Psalm.
-	$(DOCKER_COMPOSE_DEV) run --rm app ./vendor/bin/psalm $(CLI_ARGS)
+	$(DOCKER_COMPOSE_DEV) exec app ./vendor/bin/psalm $(CLI_ARGS)
 endif
 
 ifeq ($(PRIMARY_GOAL),composer-dependency-analyser)
 composer-dependency-analyser: ## Run Composer Dependency Analyser.
-	$(DOCKER_COMPOSE_DEV) run --rm app ./vendor/bin/composer-dependency-analyser --config=composer-dependency-analyser.php $(CLI_ARGS)
+	$(DOCKER_COMPOSE_DEV) exec app ./vendor/bin/composer-dependency-analyser --config=composer-dependency-analyser.php $(CLI_ARGS)
 endif
 
 #

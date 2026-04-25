@@ -1,63 +1,75 @@
 FROM composer/composer:2-bin AS composer
 
-FROM dunglas/frankenphp:1-php8.2-bookworm AS base
+FROM php:8.4-fpm-bookworm AS base
 
-RUN apt update && apt -y install \
-    unzip
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN install-php-extensions \
-    opcache \
-    mbstring \
-    intl \
-    dom \
-    ctype \
-    curl \
-    phar \
-    openssl \
-    xml \
-    xmlwriter \
-    simplexml \
-    pdo
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        curl \
+        supervisor \
+        libzip-dev \
+        libicu-dev \
+        libpq-dev \
+        libonig-dev \
+        libxml2-dev \
+        libssl-dev \
+        libcurl4-openssl-dev \
+    && docker-php-ext-install -j"$(nproc)" \
+        pdo \
+        pdo_mysql \
+        intl \
+        bcmath \
+        pcntl \
+        sockets \
+        opcache \
+        zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV LC_ALL=C.UTF-8
+COPY --from=composer /composer /usr/bin/composer
 
-#
-# Development
-#
+WORKDIR /app
+
+COPY docker/php/conf.d/app.ini /usr/local/etc/php/conf.d/99-app.ini
+COPY docker/php/conf.d/opcache.ini /usr/local/etc/php/conf.d/10-opcache.ini
+COPY docker/php-fpm/zz-app.conf /usr/local/etc/php-fpm.d/zz-app.conf
+COPY docker/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+COPY docker/supervisor/conf.d /etc/supervisor/conf.d
+COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && mkdir -p /app/runtime /app/runtime/logs /app/runtime/cache \
+    && chown -R www-data:www-data /app/runtime
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 FROM base AS dev
-ARG USER_ID=10001
-ARG GROUP_ID=10001
-ARG USER_NAME=appuser
-ARG GROUP_NAME=appuser
 
-RUN install-php-extensions \
-    xdebug
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
-COPY --from=composer /composer /usr/bin/composer
+RUN set -eux; \
+    if [ "${GROUP_ID}" != "33" ]; then groupmod -o -g "${GROUP_ID}" www-data; fi; \
+    if [ "${USER_ID}" != "33" ]; then usermod -o -u "${USER_ID}" www-data; fi
 
-# Based on https://frankenphp.dev/docs/docker/#running-as-a-non-root-user
-RUN \
-	groupadd --gid ${GROUP_ID} ${GROUP_NAME}; \
-    useradd --gid ${GROUP_ID} --uid ${USER_ID} ${GROUP_NAME}; \
-	# Add additional capability to bind to port 80 and 443 \
-	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp; \
-	# Give write access to /data/caddy and /config/caddy \
-	chown -R ${USER_NAME}:${GROUP_NAME} /data/caddy && chown -R ${USER_NAME}:${GROUP_NAME} /config/caddy
-USER ${USER_NAME}
-
-#
-# Production
-#
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 FROM base AS prod-builder
-COPY --from=composer /composer /usr/bin/composer
 COPY .. /app
 RUN --mount=type=cache,target=/tmp/cache \
-    composer install --no-dev --no-progress --no-interaction --classmap-authoritative && \
-    rm composer.lock composer.json
+    composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --classmap-authoritative \
+    && rm -rf /root/.composer/cache
 
 FROM base AS prod
 ENV APP_ENV=prod
 COPY --from=prod-builder --chown=www-data:www-data /app /app
-USER www-data
