@@ -23,8 +23,8 @@ services:
 
   mysql:
     ports:
-      - "${MYSQL_FORWARD_PORT:-3306}:3306"
+      - "${MYSQL_PORT:-${MYSQL_FORWARD_PORT:-3306}}:3306"
 
   redis:
     ports:
-      - "${REDIS_FORWARD_PORT:-6379}:6379"
+      - "${REDIS_PORT:-${REDIS_FORWARD_PORT:-6379}}:6379"
