@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Dashboard\Infrastructure\Asset\DashboardAsset;
 use App\Shared\ApplicationParams;
+use Yiisoft\Assets\AssetManager;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Html\Html;
 
@@ -10,8 +12,17 @@ use Yiisoft\Html\Html;
  * @var string $content
  * @var ApplicationParams $applicationParams
  * @var Aliases $aliases
+ * @var AssetManager $assetManager
  * @var Yiisoft\View\WebView $this
  */
+
+$assetManager->register(DashboardAsset::class);
+
+$this->addCssFiles($assetManager->getCssFiles());
+$this->addCssStrings($assetManager->getCssStrings());
+$this->addJsFiles($assetManager->getJsFiles());
+$this->addJsStrings($assetManager->getJsStrings());
+$this->addJsVars($assetManager->getJsVars());
 
 $this->beginPage();
 ?>
@@ -22,7 +33,6 @@ $this->beginPage();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="<?= $aliases->get('@baseUrl/favicon.svg') ?>" type="image/svg+xml">
     <link rel="stylesheet" href="/fonts/inter/inter.css">
-    <link rel="stylesheet" href="/assets/dashboard/tabler.min.css">
     <title><?= Html::encode($this->getTitle()) ?></title>
     <?php $this->head() ?>
 </head>
@@ -34,7 +44,6 @@ $this->beginPage();
         <?= $content ?>
     </div>
 </div>
-<script src="/assets/dashboard/tabler.min.js"></script>
 <?php $this->endBody() ?>
 </body>
 </html>
