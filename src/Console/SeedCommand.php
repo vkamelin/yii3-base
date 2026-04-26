@@ -295,6 +295,19 @@ final class SeedCommand extends Command
         $existingId = $this->findUserIdByNormalizedEmail($db, $emailNormalized);
 
         if ($existingId !== null) {
+            $db->createCommand()->update(
+                'users',
+                [
+                    'email' => self::ADMIN_EMAIL,
+                    'email_normalized' => $emailNormalized,
+                    'name' => self::ADMIN_NAME,
+                    'status' => self::ADMIN_STATUS,
+                    'deleted_at' => null,
+                    'updated_at' => $now,
+                ],
+                ['id' => $existingId],
+            )->execute();
+
             return [$existingId, false];
         }
 
