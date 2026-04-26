@@ -37,10 +37,10 @@ $hasActiveChild = static function (array $children) use ($isActive): bool {
 };
 
 $menu = [
-    ['label' => 'Управление доступом', 'icon' => 'users', 'child' => [
-        ['label' => 'Все пользователи', 'url' => '/dashboard/users', 'prefix' => 'dashboard.users'],
-        ['label' => 'Роли', 'url' => '/dashboard/roles', 'prefix' => 'dashboard.roles'],
-        ['label' => 'Разрешения', 'url' => '/dashboard/permissions', 'prefix' => 'dashboard.permissions'],
+    ['label' => 'Управление доступом', 'icon' => 'shield', 'child' => [
+        ['label' => 'Пользователи', 'url' => '/dashboard/users', 'prefix' => 'dashboard.users', 'icon' => 'users'],
+        ['label' => 'Роли', 'url' => '/dashboard/roles', 'prefix' => 'dashboard.roles', 'icon' => 'user-shield'],
+        ['label' => 'Разрешения', 'url' => '/dashboard/permissions', 'prefix' => 'dashboard.permissions', 'icon' => 'user-key'],
     ]],
 ];
 
@@ -121,7 +121,7 @@ $this->addCssStrings([
     color: inherit;
     opacity: .75;
     text-decoration: none;
-    padding-left: 2.5rem;
+    padding-left: 1rem;
 }
 .dashboard-submenu-link:hover,
 .dashboard-submenu-link:focus {
@@ -168,7 +168,7 @@ $this->beginPage();
 
     <div class="page-wrapper">
         <header class="navbar navbar-expand-md d-print-none">
-            <div class="container-xl">
+            <div class="container-fluid">
                 <div class="navbar-nav flex-row order-md-last">
                     <div class="nav-item">
                         <form method="post" action="/dashboard/logout">
@@ -180,7 +180,7 @@ $this->beginPage();
             </div>
         </header>
         <div class="page-body">
-            <div class="container-xl">
+            <div class="container-fluid">
                 <?php require __DIR__ . '/Partial/flash-messages.php'; ?>
                 <?= $content ?>
             </div>
