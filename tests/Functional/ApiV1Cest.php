@@ -121,7 +121,7 @@ final class ApiV1Cest
 
     public function validationErrorFormat(FunctionalTester $tester): void
     {
-        $request = (new ServerRequest('POST', '/api/v1/auth/login'))
+        $request = (new ServerRequest(method: 'POST', uri: '/api/v1/auth/login'))
             ->withHeader('Accept', 'application/json')
             ->withHeader('Content-Type', 'application/json')
             ->withBody((new StreamFactory())->createStream('{"email":'));
@@ -197,7 +197,7 @@ final class ApiV1Cest
         ?array $payload = null,
         array $headers = [],
     ): ResponseInterface {
-        $request = new ServerRequest($method, $uri);
+        $request = new ServerRequest(method: $method, uri: $uri);
         $request = $request->withHeader('Accept', 'application/json');
 
         foreach ($headers as $name => $value) {

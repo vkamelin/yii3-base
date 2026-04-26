@@ -11,9 +11,12 @@ use App\Auth\Domain\Repository\AuthTokenRepositoryInterface;
 use App\Auth\Domain\ValueObject\TokenHash;
 use App\Auth\Interface\Api\BearerTokenExtractor;
 use App\Auth\Interface\Web\Response\RedirectResponseFactory;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Interface\Http\ApiErrorResponder;
 use App\Shared\Interface\Http\Middleware\AuthenticationMiddleware;
 use App\Shared\Interface\Http\RequestAttributes;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\Email;
 use App\User\Domain\ValueObject\UserId;
@@ -24,6 +27,7 @@ use HttpSoft\Message\StreamFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
 
@@ -47,6 +51,8 @@ final class AuthenticationMiddlewareTest extends Unit
             getAuthenticatedUserHandler: $this->createNoopAuthHandler(),
             apiErrorResponder: new ApiErrorResponder($responseFactory, new StreamFactory()),
             redirectResponseFactory: new RedirectResponseFactory($responseFactory),
+            activityLogger: $this->createNullActivityLogger(),
+            auditContext: new RequestAuditContext(new RequestProvider()),
         );
 
         $request = (new ServerRequest(uri: '/api/v1/auth/me'))
@@ -62,6 +68,15 @@ final class AuthenticationMiddlewareTest extends Unit
         $response = $middleware->process($request, $handler);
 
         assertSame(401, $response->getStatusCode());
+    }
+
+    private function createNullActivityLogger(): ActivityLoggerInterface
+    {
+        return new class implements ActivityLoggerInterface {
+            public function log(ActivityLogEntry $entry): void
+            {
+            }
+        };
     }
 
     private function createNoopAuthHandler(): GetAuthenticatedUserHandler

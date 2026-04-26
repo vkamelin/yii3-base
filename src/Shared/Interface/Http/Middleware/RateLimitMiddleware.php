@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Shared\Interface\Http\Middleware;
 
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\ApiAuditAction;
 use App\Shared\Interface\Http\ApiErrorResponder;
 use App\Shared\Interface\Http\RateLimit\RateLimiterInterface;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -24,6 +29,8 @@ final readonly class RateLimitMiddleware implements MiddlewareInterface
     public function __construct(
         private RateLimiterInterface $rateLimiter,
         private ApiErrorResponder $apiErrorResponder,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
         private int $limit = 60,
         private int $windowSeconds = 60,
         private string $keyPrefix = 'rate_limit:api:',
@@ -50,6 +57,23 @@ final readonly class RateLimitMiddleware implements MiddlewareInterface
         );
 
         if ($result->isLimited($this->limit)) {
+            $context = $this->auditContext->fromRequest(
+                request: $request,
+                defaultSource: ActorContext::SOURCE_API,
+                defaultActorType: ActorContext::ACTOR_GUEST,
+            );
+            $this->activityLogger->log(ActivityLogEntry::api(
+                action: ApiAuditAction::RATE_LIMIT_EXCEEDED,
+                actorUserId: $context->userId,
+                entityType: 'api_request',
+                payload: [
+                    'method' => $request->getMethod(),
+                    'path' => $request->getUri()->getPath(),
+                    'retry_after' => $result->retryAfter,
+                ],
+                context: $context,
+            ));
+
             return $this->apiErrorResponder->error(
                 request: $request,
                 statusCode: 429,

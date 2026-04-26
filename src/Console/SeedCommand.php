@@ -6,6 +6,10 @@ namespace App\Console;
 
 use App\Auth\Domain\Service\PasswordHasherInterface;
 use App\Auth\Domain\ValueObject\PlainPassword;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\SystemAuditAction;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -143,6 +147,7 @@ final class SeedCommand extends Command
     public function __construct(
         private readonly ConnectionInterface $db,
         private readonly PasswordHasherInterface $passwordHasher,
+        private readonly ActivityLoggerInterface $activityLogger,
     ) {
         parent::__construct();
     }
@@ -175,6 +180,15 @@ final class SeedCommand extends Command
             $output->writeln(sprintf('<error>Seed failed: %s</error>', $e->getMessage()));
             return ExitCode::UNSPECIFIED_ERROR;
         }
+
+        $this->activityLogger->log(ActivityLogEntry::system(
+            action: SystemAuditAction::SEED_EXECUTED,
+            entityType: 'seed',
+            payload: [
+                'reset_admin_password' => $resetAdminPassword,
+            ],
+            context: ActorContext::system(ActorContext::SOURCE_CONSOLE),
+        ));
 
         $output->writeln('<info>Seed completed successfully.</info>');
         $output->writeln(

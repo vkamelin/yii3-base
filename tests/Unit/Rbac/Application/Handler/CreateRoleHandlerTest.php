@@ -10,11 +10,15 @@ use App\Rbac\Domain\Entity\Role;
 use App\Rbac\Domain\Repository\RoleRepositoryInterface;
 use App\Rbac\Domain\ValueObject\RoleCode;
 use App\Rbac\Domain\ValueObject\RoleId;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Exception\ConflictException;
 use App\Shared\Application\Exception\ValidationException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\ValueObject\UserId;
 use Codeception\Test\Unit;
 use DateTimeImmutable;
+use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
 
@@ -23,7 +27,11 @@ final class CreateRoleHandlerTest extends Unit
     public function testCreateRole(): void
     {
         $repository = new InMemoryRoleRepository();
-        $handler = new CreateRoleHandler($repository);
+        $handler = new CreateRoleHandler(
+            $repository,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
 
         $result = $handler->handle(new CreateRoleCommand(
             code: 'auditor',
@@ -39,7 +47,11 @@ final class CreateRoleHandlerTest extends Unit
     public function testDuplicateRoleCodeThrowsConflict(): void
     {
         $repository = new InMemoryRoleRepository();
-        $handler = new CreateRoleHandler($repository);
+        $handler = new CreateRoleHandler(
+            $repository,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
         $handler->handle(new CreateRoleCommand('auditor', 'Auditor'));
 
         $this->expectException(ConflictException::class);
@@ -49,10 +61,23 @@ final class CreateRoleHandlerTest extends Unit
     public function testInvalidRoleCodeThrowsValidationException(): void
     {
         $repository = new InMemoryRoleRepository();
-        $handler = new CreateRoleHandler($repository);
+        $handler = new CreateRoleHandler(
+            $repository,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
 
         $this->expectException(ValidationException::class);
         $handler->handle(new CreateRoleCommand('INVALID', 'Auditor'));
+    }
+
+    private function createNullActivityLogger(): ActivityLoggerInterface
+    {
+        return new class implements ActivityLoggerInterface {
+            public function log(ActivityLogEntry $entry): void
+            {
+            }
+        };
     }
 }
 

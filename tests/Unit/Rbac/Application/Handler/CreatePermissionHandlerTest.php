@@ -11,10 +11,14 @@ use App\Rbac\Domain\Repository\PermissionRepositoryInterface;
 use App\Rbac\Domain\ValueObject\PermissionCode;
 use App\Rbac\Domain\ValueObject\PermissionId;
 use App\Rbac\Domain\ValueObject\RoleId;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Exception\ConflictException;
 use App\Shared\Application\Exception\ValidationException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\ValueObject\UserId;
 use Codeception\Test\Unit;
+use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
 
@@ -23,7 +27,11 @@ final class CreatePermissionHandlerTest extends Unit
     public function testCreatePermission(): void
     {
         $repository = new InMemoryPermissionRepository();
-        $handler = new CreatePermissionHandler($repository);
+        $handler = new CreatePermissionHandler(
+            $repository,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
 
         $result = $handler->handle(new CreatePermissionCommand(
             code: 'users.assign_role',
@@ -40,7 +48,11 @@ final class CreatePermissionHandlerTest extends Unit
     public function testDuplicatePermissionCodeThrowsConflict(): void
     {
         $repository = new InMemoryPermissionRepository();
-        $handler = new CreatePermissionHandler($repository);
+        $handler = new CreatePermissionHandler(
+            $repository,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
         $handler->handle(new CreatePermissionCommand('users.assign_role', 'Assign role', 'users'));
 
         $this->expectException(ConflictException::class);
@@ -50,10 +62,23 @@ final class CreatePermissionHandlerTest extends Unit
     public function testInvalidPermissionCodeThrowsValidationException(): void
     {
         $repository = new InMemoryPermissionRepository();
-        $handler = new CreatePermissionHandler($repository);
+        $handler = new CreatePermissionHandler(
+            $repository,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
 
         $this->expectException(ValidationException::class);
         $handler->handle(new CreatePermissionCommand('users', 'Invalid', 'users'));
+    }
+
+    private function createNullActivityLogger(): ActivityLoggerInterface
+    {
+        return new class implements ActivityLoggerInterface {
+            public function log(ActivityLogEntry $entry): void
+            {
+            }
+        };
     }
 }
 

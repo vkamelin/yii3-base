@@ -10,6 +10,9 @@ use App\Auth\Domain\Repository\UserCredentialsRepositoryInterface;
 use App\Auth\Domain\Service\PasswordHasherInterface;
 use App\Auth\Domain\ValueObject\PasswordHash;
 use App\Auth\Domain\ValueObject\PlainPassword;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\Shared\Application\Exception\InvalidCredentialsException;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
@@ -18,6 +21,7 @@ use App\User\Domain\ValueObject\UserId;
 use App\User\Domain\ValueObject\UserName;
 use Codeception\Test\Unit;
 use DateTimeImmutable;
+use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
 
@@ -37,6 +41,8 @@ final class LoginHandlerTest extends Unit
             users: new InMemoryUserRepository($user),
             credentials: new InMemoryCredentialsRepository($user->id(), $passwordHash),
             passwordHasher: new NativePasswordHasher(),
+            activityLogger: $this->createNullActivityLogger(),
+            auditContext: new RequestAuditContext(new RequestProvider()),
         );
 
         $result = $handler->handle(new LoginCommand('user@example.com', 'strong-pass-123'));
@@ -58,10 +64,21 @@ final class LoginHandlerTest extends Unit
             users: new InMemoryUserRepository($user),
             credentials: new InMemoryCredentialsRepository($user->id(), $passwordHash),
             passwordHasher: new NativePasswordHasher(),
+            activityLogger: $this->createNullActivityLogger(),
+            auditContext: new RequestAuditContext(new RequestProvider()),
         );
 
         $this->expectException(InvalidCredentialsException::class);
         $handler->handle(new LoginCommand('user@example.com', 'wrong-pass-123'));
+    }
+
+    private function createNullActivityLogger(): ActivityLoggerInterface
+    {
+        return new class implements ActivityLoggerInterface {
+            public function log(ActivityLogEntry $entry): void
+            {
+            }
+        };
     }
 }
 

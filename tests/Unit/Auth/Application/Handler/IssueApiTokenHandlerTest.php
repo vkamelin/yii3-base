@@ -10,6 +10,9 @@ use App\Auth\Domain\Entity\AuthToken;
 use App\Auth\Domain\Repository\AuthTokenRepositoryInterface;
 use App\Auth\Domain\Service\TokenGeneratorInterface;
 use App\Auth\Domain\ValueObject\TokenHash;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\Email;
@@ -17,6 +20,7 @@ use App\User\Domain\ValueObject\UserId;
 use App\User\Domain\ValueObject\UserName;
 use Codeception\Test\Unit;
 use DateTimeImmutable;
+use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertNotEmpty;
 use function PHPUnit\Framework\assertSame;
@@ -37,6 +41,8 @@ final class IssueApiTokenHandlerTest extends Unit
             users: new InMemoryTokenUserRepository($user),
             tokens: $repository,
             tokenGenerator: new FixedTokenGenerator(),
+            activityLogger: $this->createNullActivityLogger(),
+            auditContext: new RequestAuditContext(new RequestProvider()),
         );
 
         $result = $handler->handle(new IssueApiTokenCommand(
@@ -49,6 +55,15 @@ final class IssueApiTokenHandlerTest extends Unit
         assertSame('plain-token-value', $result->plainToken);
         assertSame('api', $result->tokenType);
         assertSame(1, $repository->count());
+    }
+
+    private function createNullActivityLogger(): ActivityLoggerInterface
+    {
+        return new class implements ActivityLoggerInterface {
+            public function log(ActivityLogEntry $entry): void
+            {
+            }
+        };
     }
 }
 

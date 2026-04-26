@@ -6,8 +6,13 @@ namespace App\Rbac\Interface\Middleware;
 
 use App\Auth\Interface\Web\Response\RedirectResponseFactory;
 use App\Rbac\Domain\Service\AccessCheckerInterface;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\DashboardAuditAction;
 use App\Shared\Interface\Http\ApiErrorResponder;
 use App\Shared\Interface\Http\RequestAttributes;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\ValueObject\UserId;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -36,6 +41,8 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         private ResponseFactoryInterface $responseFactory,
         private RedirectResponseFactory $redirectResponseFactory,
         private ApiErrorResponder $apiErrorResponder,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
         private array $apiPrefixes = ['/api', '/api/'],
         private array $webPublicPaths = ['/login', '/dashboard/login'],
         private array $webPermissionsByPrefix = ['/dashboard' => 'dashboard.access'],
@@ -80,6 +87,7 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         }
 
         if (!$this->accessChecker->userHasPermission($user, $permission)) {
+            $this->logAccessDenied($request, $permission);
             if ($isApi) {
                 return $this->apiErrorResponder->error($request, 403, 'FORBIDDEN', 'Access denied.');
             }
@@ -153,5 +161,26 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         }
 
         return null;
+    }
+
+    private function logAccessDenied(ServerRequestInterface $request, string $permission): void
+    {
+        $context = $this->auditContext->fromRequest(
+            request: $request,
+            defaultSource: $this->isApiRequest($request) ? ActorContext::SOURCE_API : ActorContext::SOURCE_WEB,
+            defaultActorType: ActorContext::ACTOR_USER,
+        );
+
+        $this->activityLogger->log(ActivityLogEntry::admin(
+            action: DashboardAuditAction::ACCESS_DENIED,
+            actorUserId: $context->userId,
+            entityType: 'permission',
+            payload: [
+                'permission' => $permission,
+                'path' => $request->getUri()->getPath(),
+                'method' => $request->getMethod(),
+            ],
+            context: $context,
+        ));
     }
 }

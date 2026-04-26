@@ -10,8 +10,13 @@ use App\Rbac\Domain\Entity\Permission;
 use App\Rbac\Domain\Repository\PermissionRepositoryInterface;
 use App\Rbac\Domain\ValueObject\PermissionCode;
 use App\Rbac\Domain\ValueObject\PermissionId;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\AdminAuditAction;
 use App\Shared\Application\Exception\ConflictException;
 use App\Shared\Application\Exception\ValidationException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use DateTimeImmutable;
 use Throwable;
 
@@ -19,6 +24,8 @@ final readonly class CreatePermissionHandler
 {
     public function __construct(
         private PermissionRepositoryInterface $permissions,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
     ) {
     }
 
@@ -51,6 +58,24 @@ final readonly class CreatePermissionHandler
         );
 
         $this->permissions->save($permission);
+
+        $context = $this->auditContext->actor(
+            defaultSource: ActorContext::SOURCE_WEB,
+            defaultActorType: ActorContext::ACTOR_ADMIN,
+        );
+        $this->activityLogger->log(ActivityLogEntry::admin(
+            action: AdminAuditAction::PERMISSION_CREATED,
+            actorUserId: $context->userId,
+            entityType: 'permission',
+            entityId: $permission->id()->value(),
+            payload: [
+                'code' => $permission->code()->value(),
+                'name' => $permission->name(),
+                'group_code' => $permission->groupCode(),
+                'is_system' => $permission->isSystem(),
+            ],
+            context: $context,
+        ));
 
         return new PermissionView(
             id: $permission->id()->value(),

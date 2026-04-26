@@ -11,7 +11,12 @@ use App\Auth\Domain\Enum\AuthTokenType;
 use App\Auth\Domain\Repository\AuthTokenRepositoryInterface;
 use App\Auth\Domain\Service\TokenGeneratorInterface;
 use App\Auth\Domain\ValueObject\TokenHash;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\AuthAuditAction;
 use App\Shared\Application\Exception\NotFoundException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\UserId;
 use DateTimeImmutable;
@@ -23,6 +28,8 @@ final readonly class IssueApiTokenHandler
         private UserRepositoryInterface $users,
         private AuthTokenRepositoryInterface $tokens,
         private TokenGeneratorInterface $tokenGenerator,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
     ) {
     }
 
@@ -53,6 +60,24 @@ final readonly class IssueApiTokenHandler
         );
 
         $this->tokens->save($token);
+
+        $context = $this->auditContext->actor(
+            defaultSource: ActorContext::SOURCE_API,
+            defaultActorType: ActorContext::ACTOR_USER,
+            fallbackUserId: $userId->value(),
+        );
+        $this->activityLogger->log(ActivityLogEntry::api(
+            action: AuthAuditAction::API_TOKEN_ISSUED,
+            actorUserId: $userId->value(),
+            entityType: 'auth_token',
+            entityId: $token->id(),
+            payload: [
+                'token_type' => $token->type()->value,
+                'name' => $token->name(),
+                'expires_at' => $token->expiresAt()?->format(DATE_ATOM),
+            ],
+            context: $context,
+        ));
 
         return new ApiTokenResult(
             tokenId: $token->id(),

@@ -8,10 +8,15 @@ use App\Api\Interface\Http\Response\ApiErrorResponseFactory;
 use App\Auth\Application\Command\GetAuthenticatedUserCommand;
 use App\Auth\Application\Handler\GetAuthenticatedUserHandler;
 use App\Auth\Interface\Api\BearerTokenExtractor;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\ApiAuditAction;
 use App\Shared\Application\Exception\AccessDeniedException;
 use App\Shared\Application\Exception\InvalidCredentialsException;
 use App\Shared\Application\Exception\ValidationException;
 use App\Shared\Interface\Http\RequestAttributes;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -30,6 +35,8 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
         private BearerTokenExtractor $tokenExtractor,
         private GetAuthenticatedUserHandler $getAuthenticatedUserHandler,
         private ApiErrorResponseFactory $errorResponseFactory,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
         private array $apiPrefixes = ['/api', '/api/'],
         private array $publicPaths = ['/api/v1/auth/login'],
     ) {
@@ -47,12 +54,14 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
 
         $token = $this->tokenExtractor->extract($request);
         if ($token === null) {
+            $this->logAuthFailed($request, 'missing_token');
             return $this->errorResponseFactory->unauthenticated($request, 'Missing bearer token.');
         }
 
         try {
             $authResult = $this->getAuthenticatedUserHandler->handle(new GetAuthenticatedUserCommand($token));
         } catch (InvalidCredentialsException | ValidationException | AccessDeniedException) {
+            $this->logAuthFailed($request, 'invalid_token');
             return $this->errorResponseFactory->unauthenticated($request, 'Invalid bearer token.');
         }
 
@@ -75,5 +84,26 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
         }
 
         return false;
+    }
+
+    private function logAuthFailed(ServerRequestInterface $request, string $reason): void
+    {
+        $context = $this->auditContext->fromRequest(
+            request: $request,
+            defaultSource: ActorContext::SOURCE_API,
+            defaultActorType: ActorContext::ACTOR_GUEST,
+        );
+
+        $this->activityLogger->log(ActivityLogEntry::api(
+            action: ApiAuditAction::TOKEN_AUTH_FAILED,
+            actorUserId: $context->userId,
+            entityType: 'api_request',
+            payload: [
+                'reason' => $reason,
+                'path' => $request->getUri()->getPath(),
+                'method' => $request->getMethod(),
+            ],
+            context: $context,
+        ));
     }
 }

@@ -8,6 +8,8 @@ use App\Shared\Infrastructure\Queue\MySqlQueue;
 use App\Shared\Infrastructure\Queue\QueueInterface;
 use App\Shared\Infrastructure\Queue\RedisQueue;
 use App\Shared\Infrastructure\Queue\Worker;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use Yiisoft\Definitions\Reference;
 
 /** @var array $params */
@@ -22,6 +24,8 @@ return [
     JobSerializer::class => JobSerializer::class,
     MySqlQueue::class => [
         '__construct()' => [
+            'activityLogger' => Reference::to(ActivityLoggerInterface::class),
+            'auditContext' => Reference::to(RequestAuditContext::class),
             'defaultMaxAttempts' => $params['queue']['defaultMaxAttempts'],
         ],
     ],
@@ -32,5 +36,9 @@ return [
         ],
     ],
     QueueInterface::class => Reference::to(MySqlQueue::class),
-    Worker::class => Worker::class,
+    Worker::class => [
+        '__construct()' => [
+            'activityLogger' => Reference::to(ActivityLoggerInterface::class),
+        ],
+    ],
 ];

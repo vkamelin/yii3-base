@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Queue;
 
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\QueueAuditAction;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\Shared\Infrastructure\Queue\Exception\InvalidJobPayloadException;
 use App\Shared\Infrastructure\Queue\Exception\QueueException;
 use Yiisoft\Db\Connection\ConnectionInterface;
@@ -35,6 +40,8 @@ final class MySqlQueue implements QueueWorkerStorageInterface
     public function __construct(
         private readonly ConnectionInterface $db,
         private readonly JobSerializer $serializer,
+        private readonly ActivityLoggerInterface $activityLogger,
+        private readonly RequestAuditContext $auditContext,
         private readonly int $defaultMaxAttempts = 3,
         bool $skipLockedSupported = true,
     ) {
@@ -235,6 +242,23 @@ final class MySqlQueue implements QueueWorkerStorageInterface
         } catch (\Throwable $e) {
             throw new QueueException('Unable to push job to MySQL queue.', 0, $e);
         }
+
+        $context = $this->auditContext->actor(
+            defaultSource: ActorContext::SOURCE_QUEUE,
+            defaultActorType: ActorContext::ACTOR_SYSTEM,
+        );
+        $this->activityLogger->log(ActivityLogEntry::system(
+            action: QueueAuditAction::JOB_DISPATCHED,
+            entityType: 'queue_job',
+            entityId: $id->toString(),
+            payload: [
+                'queue' => self::DEFAULT_QUEUE,
+                'job_type' => $job->type(),
+                'delay_seconds' => $delaySeconds,
+                'max_attempts' => $maxAttempts,
+            ],
+            context: $context,
+        ));
 
         return $id->toString();
     }

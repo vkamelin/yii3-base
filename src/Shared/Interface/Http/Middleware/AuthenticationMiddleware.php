@@ -9,11 +9,16 @@ use App\Auth\Application\Handler\GetAuthenticatedUserHandler;
 use App\Auth\Application\Session\AuthSessionInterface;
 use App\Auth\Interface\Api\BearerTokenExtractor;
 use App\Auth\Interface\Web\Response\RedirectResponseFactory;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\ApiAuditAction;
 use App\Shared\Application\Exception\AccessDeniedException;
 use App\Shared\Application\Exception\InvalidCredentialsException;
 use App\Shared\Application\Exception\ValidationException;
 use App\Shared\Interface\Http\ApiErrorResponder;
 use App\Shared\Interface\Http\RequestAttributes;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -38,6 +43,8 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
         private GetAuthenticatedUserHandler $getAuthenticatedUserHandler,
         private ApiErrorResponder $apiErrorResponder,
         private RedirectResponseFactory $redirectResponseFactory,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
         private array $apiPrefixes = ['/api', '/api/'],
         private array $apiPublicPaths = ['/api/v1/auth/login'],
         private array $webProtectedPrefixes = ['/dashboard'],
@@ -61,14 +68,17 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
 
         $token = $this->tokenExtractor->extract($request);
         if ($token === null) {
+            $this->logBearerFailure($request, 'missing_token');
             return $this->apiErrorResponder->error($request, 401, 'UNAUTHORIZED', 'Missing bearer token.');
         }
 
         try {
             $result = $this->getAuthenticatedUserHandler->handle(new GetAuthenticatedUserCommand($token));
         } catch (AccessDeniedException $e) {
+            $this->logBearerFailure($request, 'access_denied');
             return $this->apiErrorResponder->error($request, 403, 'FORBIDDEN', $e->getMessage() ?: 'Forbidden.');
         } catch (InvalidCredentialsException|ValidationException) {
+            $this->logBearerFailure($request, 'invalid_token');
             return $this->apiErrorResponder->error($request, 401, 'UNAUTHORIZED', 'Invalid bearer token.');
         }
 
@@ -139,5 +149,25 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         return '/login';
+    }
+
+    private function logBearerFailure(ServerRequestInterface $request, string $reason): void
+    {
+        $context = $this->auditContext->fromRequest(
+            request: $request,
+            defaultSource: ActorContext::SOURCE_API,
+            defaultActorType: ActorContext::ACTOR_GUEST,
+        );
+        $this->activityLogger->log(ActivityLogEntry::api(
+            action: ApiAuditAction::TOKEN_AUTH_FAILED,
+            actorUserId: $context->userId,
+            entityType: 'api_request',
+            payload: [
+                'reason' => $reason,
+                'path' => $request->getUri()->getPath(),
+                'method' => $request->getMethod(),
+            ],
+            context: $context,
+        ));
     }
 }

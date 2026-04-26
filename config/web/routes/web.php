@@ -8,6 +8,8 @@ use App\Auth\Interface\Web\Logout\LogoutAction;
 use App\Dashboard\Interface\Web\Auth\LoginPageAction as DashboardLoginPageAction;
 use App\Dashboard\Interface\Web\Auth\LoginSubmitAction as DashboardLoginSubmitAction;
 use App\Dashboard\Interface\Web\Auth\LogoutAction as DashboardLogoutAction;
+use App\Dashboard\Interface\Web\ActivityLog\IndexAction as DashboardActivityLogIndexAction;
+use App\Dashboard\Interface\Web\ActivityLog\ViewAction as DashboardActivityLogViewAction;
 use App\Dashboard\Interface\Web\Home\IndexAction as DashboardHomeAction;
 use App\Dashboard\Interface\Web\Permission\ListAction as DashboardPermissionsAction;
 use App\Dashboard\Interface\Web\Role\ListAction as DashboardRolesAction;
@@ -67,5 +69,11 @@ return [
             Route::get('/dashboard/permissions')
                 ->action(DashboardPermissionsAction::class)
                 ->name('dashboard.permissions.index'),
+            Route::get('/dashboard/activity-log')
+                ->action(DashboardActivityLogIndexAction::class)
+                ->name('dashboard.activity-log.index'),
+            Route::get('/dashboard/activity-log/{id}')
+                ->action(DashboardActivityLogViewAction::class)
+                ->name('dashboard.activity-log.view'),
         ),
 ];

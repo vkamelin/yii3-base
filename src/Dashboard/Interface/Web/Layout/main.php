@@ -41,6 +41,7 @@ $menu = [
         ['label' => 'Пользователи', 'url' => '/dashboard/users', 'prefix' => 'dashboard.users', 'icon' => 'users'],
         ['label' => 'Роли', 'url' => '/dashboard/roles', 'prefix' => 'dashboard.roles', 'icon' => 'user-shield'],
         ['label' => 'Разрешения', 'url' => '/dashboard/permissions', 'prefix' => 'dashboard.permissions', 'icon' => 'user-key'],
+        ['label' => 'Activity log', 'url' => '/dashboard/activity-log', 'prefix' => 'dashboard.activity-log', 'icon' => 'history'],
     ]],
 ];
 

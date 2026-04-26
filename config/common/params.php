@@ -61,6 +61,7 @@ return [
         'rbac' => [
             'webPublicPaths' => ['/login', '/dashboard/login'],
             'webPermissionsByPrefix' => [
+                '/dashboard/activity-log' => 'activity_log.view',
                 '/dashboard/users' => 'users.manage',
                 '/dashboard/roles' => 'roles.manage',
                 '/dashboard/permissions' => 'permissions.manage',

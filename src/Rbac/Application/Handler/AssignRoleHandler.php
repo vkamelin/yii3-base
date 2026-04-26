@@ -7,8 +7,13 @@ namespace App\Rbac\Application\Handler;
 use App\Rbac\Application\Command\AssignRoleCommand;
 use App\Rbac\Domain\Repository\RoleRepositoryInterface;
 use App\Rbac\Domain\ValueObject\RoleCode;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\AdminAuditAction;
 use App\Shared\Application\Exception\NotFoundException;
 use App\Shared\Application\Exception\ValidationException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\UserId;
 use Throwable;
@@ -18,6 +23,8 @@ final readonly class AssignRoleHandler
     public function __construct(
         private UserRepositoryInterface $users,
         private RoleRepositoryInterface $roles,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
     ) {
     }
 
@@ -46,5 +53,20 @@ final readonly class AssignRoleHandler
         }
 
         $this->roles->assignToUser($userId, $role->id());
+
+        $context = $this->auditContext->actor(
+            defaultSource: ActorContext::SOURCE_WEB,
+            defaultActorType: ActorContext::ACTOR_ADMIN,
+        );
+        $this->activityLogger->log(ActivityLogEntry::admin(
+            action: AdminAuditAction::USER_ROLE_ASSIGNED,
+            actorUserId: $context->userId,
+            entityType: 'user',
+            entityId: $userId->value(),
+            payload: [
+                'role' => $role->code()->value(),
+            ],
+            context: $context,
+        ));
     }
 }

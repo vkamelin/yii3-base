@@ -10,8 +10,13 @@ use App\Rbac\Domain\Entity\Role;
 use App\Rbac\Domain\Repository\RoleRepositoryInterface;
 use App\Rbac\Domain\ValueObject\RoleCode;
 use App\Rbac\Domain\ValueObject\RoleId;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\AdminAuditAction;
 use App\Shared\Application\Exception\ConflictException;
 use App\Shared\Application\Exception\ValidationException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use DateTimeImmutable;
 use Throwable;
 
@@ -19,6 +24,8 @@ final readonly class CreateRoleHandler
 {
     public function __construct(
         private RoleRepositoryInterface $roles,
+        private ActivityLoggerInterface $activityLogger,
+        private RequestAuditContext $auditContext,
     ) {
     }
 
@@ -50,6 +57,23 @@ final readonly class CreateRoleHandler
         );
 
         $this->roles->save($role);
+
+        $context = $this->auditContext->actor(
+            defaultSource: ActorContext::SOURCE_WEB,
+            defaultActorType: ActorContext::ACTOR_ADMIN,
+        );
+        $this->activityLogger->log(ActivityLogEntry::admin(
+            action: AdminAuditAction::ROLE_CREATED,
+            actorUserId: $context->userId,
+            entityType: 'role',
+            entityId: $role->id()->value(),
+            payload: [
+                'code' => $role->code()->value(),
+                'name' => $role->name(),
+                'is_system' => $role->isSystem(),
+            ],
+            context: $context,
+        ));
 
         return new RoleView(
             id: $role->id()->value(),

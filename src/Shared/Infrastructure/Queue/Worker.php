@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Queue;
 
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Audit\Action\QueueAuditAction;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -21,6 +25,7 @@ final class Worker
         private readonly JobRegistry $registry,
         private readonly ContainerInterface $container,
         private readonly LoggerInterface $logger,
+        private readonly ActivityLoggerInterface $activityLogger,
     ) {}
 
     public function run(QueueWorkerStorageInterface $queue, WorkerOptions $options): WorkerResult
@@ -79,20 +84,66 @@ final class Worker
                     'queue' => $options->queueName,
                 ],
             );
+            $this->activityLogger->log(ActivityLogEntry::system(
+                action: QueueAuditAction::JOB_STARTED,
+                entityType: 'queue_job',
+                entityId: $reservedJob->id->toString(),
+                payload: [
+                    'job_type' => $reservedJob->type,
+                    'attempt' => $reservedJob->attempt,
+                    'max_attempts' => $reservedJob->maxAttempts,
+                    'queue' => $options->queueName,
+                ],
+                context: ActorContext::system(ActorContext::SOURCE_QUEUE),
+            ));
 
             try {
                 $handler = $this->registry->resolveHandler($reservedJob->job, $this->container);
                 $handler->handle($reservedJob->job);
                 $queue->markDone($reservedJob);
                 $processed++;
+                $this->activityLogger->log(ActivityLogEntry::system(
+                    action: QueueAuditAction::JOB_COMPLETED,
+                    entityType: 'queue_job',
+                    entityId: $reservedJob->id->toString(),
+                    payload: [
+                        'job_type' => $reservedJob->type,
+                        'attempt' => $reservedJob->attempt,
+                    ],
+                    context: ActorContext::system(ActorContext::SOURCE_QUEUE),
+                ));
             } catch (\Throwable $e) {
                 $failed++;
                 $message = $this->formatError($e);
 
                 if ($reservedJob->attempt >= $reservedJob->maxAttempts) {
                     $queue->markFailed($reservedJob, $message);
+                    $this->activityLogger->log(ActivityLogEntry::system(
+                        action: QueueAuditAction::JOB_FAILED,
+                        entityType: 'queue_job',
+                        entityId: $reservedJob->id->toString(),
+                        payload: [
+                            'job_type' => $reservedJob->type,
+                            'attempt' => $reservedJob->attempt,
+                            'max_attempts' => $reservedJob->maxAttempts,
+                            'error' => $message,
+                        ],
+                        context: ActorContext::system(ActorContext::SOURCE_QUEUE),
+                    ));
                 } else {
                     $queue->release($reservedJob, $options->sleepSeconds, $message);
+                    $this->activityLogger->log(ActivityLogEntry::system(
+                        action: QueueAuditAction::JOB_RETRIED,
+                        entityType: 'queue_job',
+                        entityId: $reservedJob->id->toString(),
+                        payload: [
+                            'job_type' => $reservedJob->type,
+                            'attempt' => $reservedJob->attempt,
+                            'max_attempts' => $reservedJob->maxAttempts,
+                            'error' => $message,
+                        ],
+                        context: ActorContext::system(ActorContext::SOURCE_QUEUE),
+                    ));
                 }
 
                 $this->logger->error(

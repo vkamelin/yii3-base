@@ -10,7 +10,10 @@ use App\Rbac\Domain\Entity\Role;
 use App\Rbac\Domain\Repository\RoleRepositoryInterface;
 use App\Rbac\Domain\ValueObject\RoleCode;
 use App\Rbac\Domain\ValueObject\RoleId;
+use App\Shared\Application\Audit\ActivityLogEntry;
+use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Exception\NotFoundException;
+use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\Email;
@@ -18,6 +21,7 @@ use App\User\Domain\ValueObject\UserId;
 use App\User\Domain\ValueObject\UserName;
 use Codeception\Test\Unit;
 use DateTimeImmutable;
+use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
 
@@ -43,7 +47,12 @@ final class AssignRoleHandlerTest extends Unit
 
         $users = new InMemoryAssignableUserRepository($user);
         $roles = new InMemoryAssignableRoleRepository($role);
-        $handler = new AssignRoleHandler($users, $roles);
+        $handler = new AssignRoleHandler(
+            $users,
+            $roles,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
 
         $command = new AssignRoleCommand($user->id()->value(), 'manager');
         $handler->handle($command);
@@ -63,10 +72,24 @@ final class AssignRoleHandlerTest extends Unit
 
         $users = new InMemoryAssignableUserRepository($user);
         $roles = new InMemoryAssignableRoleRepository(null);
-        $handler = new AssignRoleHandler($users, $roles);
+        $handler = new AssignRoleHandler(
+            $users,
+            $roles,
+            $this->createNullActivityLogger(),
+            new RequestAuditContext(new RequestProvider()),
+        );
 
         $this->expectException(NotFoundException::class);
         $handler->handle(new AssignRoleCommand($user->id()->value(), 'manager'));
+    }
+
+    private function createNullActivityLogger(): ActivityLoggerInterface
+    {
+        return new class implements ActivityLoggerInterface {
+            public function log(ActivityLogEntry $entry): void
+            {
+            }
+        };
     }
 }
 
