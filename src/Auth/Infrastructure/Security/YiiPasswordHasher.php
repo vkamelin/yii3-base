@@ -13,8 +13,7 @@ final readonly class YiiPasswordHasher implements PasswordHasherInterface
 {
     public function __construct(
         private PasswordHasher $passwordHasher = new PasswordHasher(),
-    ) {
-    }
+    ) {}
 
     public function hash(PlainPassword $password): PasswordHash
     {

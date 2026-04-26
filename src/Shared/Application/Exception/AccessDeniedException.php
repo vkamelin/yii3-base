@@ -6,6 +6,4 @@ namespace App\Shared\Application\Exception;
 
 use RuntimeException;
 
-final class AccessDeniedException extends RuntimeException
-{
-}
+final class AccessDeniedException extends RuntimeException {}

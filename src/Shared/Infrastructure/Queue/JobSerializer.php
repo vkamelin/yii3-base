@@ -19,12 +19,16 @@ final readonly class JobSerializer
         private JobRegistry $registry,
     ) {}
 
-    public function serialize(JobInterface $job): string
+    /**
+     * @param array<string,mixed> $metadata
+     */
+    public function serialize(JobInterface $job, array $metadata = []): string
     {
         return json_encode(
             [
                 'type' => $job->type(),
                 'payload' => $job->toPayload(),
+                'metadata' => $metadata,
             ],
             JSON_THROW_ON_ERROR,
         );
@@ -59,7 +63,29 @@ final readonly class JobSerializer
             throw new InvalidJobPayloadException('Queue payload does not contain valid job payload.');
         }
 
+        if (isset($decoded['metadata']) && !is_array($decoded['metadata'])) {
+            throw new InvalidJobPayloadException('Queue payload metadata must be an object.');
+        }
+
         /** @var array<string,mixed> $decoded */
         return $decoded;
+    }
+
+    /**
+     * @return array<array-key,mixed>
+     */
+    public function extractMetadata(string $encodedPayload): array
+    {
+        return $this->metadataFromEnvelope($this->decodeToArray($encodedPayload));
+    }
+
+    /**
+     * @param array<string,mixed> $envelope
+     * @return array<array-key,mixed>
+     */
+    public function metadataFromEnvelope(array $envelope): array
+    {
+        $metadata = $envelope['metadata'] ?? [];
+        return is_array($metadata) ? $metadata : [];
     }
 }

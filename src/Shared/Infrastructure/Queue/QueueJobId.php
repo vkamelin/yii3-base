@@ -62,4 +62,3 @@ final readonly class QueueJobId
         return new self($uuid->toString(), $uuid->getBytes());
     }
 }
-

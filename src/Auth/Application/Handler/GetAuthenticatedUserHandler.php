@@ -21,8 +21,7 @@ final readonly class GetAuthenticatedUserHandler
     public function __construct(
         private AuthTokenRepositoryInterface $tokens,
         private UserRepositoryInterface $users,
-    ) {
-    }
+    ) {}
 
     public function __invoke(GetAuthenticatedUserCommand $command): AuthResult
     {

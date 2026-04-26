@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Queue\Console;
 
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Infrastructure\Queue\MySqlQueue;
 use App\Shared\Infrastructure\Queue\RedisQueue;
 use App\Shared\Infrastructure\Queue\Worker;
 use App\Shared\Infrastructure\Queue\WorkerOptions;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,6 +27,8 @@ final class QueueWorkCommand extends Command
         private readonly Worker $worker,
         private readonly MySqlQueue $mySqlQueue,
         private readonly RedisQueue $redisQueue,
+        private readonly LoggerInterface $logger,
+        private readonly TraceContextProviderInterface $traceContextProvider,
     ) {
         parent::__construct();
     }
@@ -63,6 +67,18 @@ final class QueueWorkCommand extends Command
             return ExitCode::DATAERR;
         }
 
+        $traceContext = $this->traceContextProvider->get();
+        $this->logger->info('console.queue.work.started', [
+            'source' => 'console',
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'queue' => $queueName,
+            'sleep' => $sleep,
+            'max_jobs' => $maxJobs,
+            'max_time' => $maxTime,
+            'memory' => $memory,
+        ]);
+
         try {
             $result = $this->worker->run(
                 $queue,
@@ -75,9 +91,26 @@ final class QueueWorkCommand extends Command
                 ),
             );
         } catch (\Throwable $e) {
+            $this->logger->error('console.queue.work.failed', [
+                'source' => 'console',
+                'request_id' => $traceContext->requestId(),
+                'correlation_id' => $traceContext->correlationId(),
+                'queue' => $queueName,
+                'error' => $e->getMessage(),
+            ]);
             $output->writeln(sprintf('<error>Worker crashed: %s</error>', $e->getMessage()));
             return ExitCode::SOFTWARE;
         }
+
+        $this->logger->info('console.queue.work.completed', [
+            'source' => 'console',
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'queue' => $queueName,
+            'processed' => $result->processedJobs,
+            'failed' => $result->failedJobs,
+            'stop_reason' => $result->stopReason,
+        ]);
 
         $output->writeln(
             sprintf(

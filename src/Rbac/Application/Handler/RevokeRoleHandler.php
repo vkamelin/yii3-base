@@ -23,8 +23,7 @@ final readonly class RevokeRoleHandler
         private RoleRepositoryInterface $roles,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(RevokeRoleCommand $command): void
     {

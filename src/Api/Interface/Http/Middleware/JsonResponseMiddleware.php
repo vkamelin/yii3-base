@@ -27,8 +27,7 @@ final readonly class JsonResponseMiddleware implements MiddlewareInterface
     public function __construct(
         private ApiErrorResponseFactory $errorResponseFactory,
         private array $apiPrefixes = ['/api', '/api/'],
-    ) {
-    }
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

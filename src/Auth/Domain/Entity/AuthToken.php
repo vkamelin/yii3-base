@@ -29,8 +29,7 @@ final class AuthToken
         private ?DateTimeImmutable $revokedAt,
         private DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
-    ) {
-    }
+    ) {}
 
     /**
      * @param list<string>|null $abilities

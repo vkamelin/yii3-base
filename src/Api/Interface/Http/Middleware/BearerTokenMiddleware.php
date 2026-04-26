@@ -12,6 +12,7 @@ use App\Shared\Application\Audit\ActivityLogEntry;
 use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Audit\ActorContext;
 use App\Shared\Application\Audit\Action\ApiAuditAction;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Application\Exception\AccessDeniedException;
 use App\Shared\Application\Exception\InvalidCredentialsException;
 use App\Shared\Application\Exception\ValidationException;
@@ -21,6 +22,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 use function in_array;
 use function str_starts_with;
@@ -37,10 +39,11 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
         private ApiErrorResponseFactory $errorResponseFactory,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
+        private TraceContextProviderInterface $traceContextProvider,
+        private LoggerInterface $logger,
         private array $apiPrefixes = ['/api', '/api/'],
         private array $publicPaths = ['/api/v1/auth/login'],
-    ) {
-    }
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -60,7 +63,7 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
 
         try {
             $authResult = $this->getAuthenticatedUserHandler->handle(new GetAuthenticatedUserCommand($token));
-        } catch (InvalidCredentialsException | ValidationException | AccessDeniedException) {
+        } catch (InvalidCredentialsException|ValidationException|AccessDeniedException) {
             $this->logAuthFailed($request, 'invalid_token');
             return $this->errorResponseFactory->unauthenticated($request, 'Invalid bearer token.');
         }
@@ -88,6 +91,8 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
 
     private function logAuthFailed(ServerRequestInterface $request, string $reason): void
     {
+        $traceContext = $this->traceContextProvider->get();
+
         $context = $this->auditContext->fromRequest(
             request: $request,
             defaultSource: ActorContext::SOURCE_API,
@@ -105,5 +110,15 @@ final readonly class BearerTokenMiddleware implements MiddlewareInterface
             ],
             context: $context,
         ));
+
+        $this->logger->warning('api.auth.failed', [
+            'type' => 'security',
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'reason' => $reason,
+            'path' => $request->getUri()->getPath(),
+            'method' => $request->getMethod(),
+            'source' => ActorContext::SOURCE_API,
+        ]);
     }
 }

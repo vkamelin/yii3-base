@@ -8,6 +8,7 @@ use App\Shared\Application\Audit\ActivityLogEntry;
 use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Audit\ActorContext;
 use App\Shared\Application\Audit\Action\QueueAuditAction;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\Shared\Infrastructure\Queue\Exception\InvalidJobPayloadException;
 use App\Shared\Infrastructure\Queue\Exception\QueueException;
@@ -42,6 +43,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
         private readonly JobSerializer $serializer,
         private readonly ActivityLoggerInterface $activityLogger,
         private readonly RequestAuditContext $auditContext,
+        private readonly TraceContextProviderInterface $traceContextProvider,
         private readonly int $defaultMaxAttempts = 3,
         bool $skipLockedSupported = true,
     ) {
@@ -193,6 +195,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
 
             $payload = $this->payloadFromRow($row);
             $job = $this->serializer->deserialize($payload);
+            $metadata = $this->serializer->extractMetadata($payload);
             $type = $this->typeFromRow($row);
 
             if ($job->type() !== $type) {
@@ -207,6 +210,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                 $job,
                 $attempt,
                 $maxAttempts,
+                $metadata,
             );
         });
     }
@@ -218,6 +222,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
         $id = QueueJobId::generate();
         $now = $this->now();
         $availableAt = $this->now($delaySeconds);
+        $metadata = $this->buildTraceMetadata();
 
         try {
             $this->db->createCommand()->insert(
@@ -226,7 +231,7 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                     'id' => $id->toBinary(),
                     'queue' => self::DEFAULT_QUEUE,
                     'job_type' => $job->type(),
-                    'payload' => $this->serializer->serialize($job),
+                    'payload' => $this->serializer->serialize($job, $metadata),
                     'status' => self::STATUS_PENDING,
                     'attempts' => 0,
                     'max_attempts' => $maxAttempts,
@@ -256,6 +261,8 @@ final class MySqlQueue implements QueueWorkerStorageInterface
                 'job_type' => $job->type(),
                 'delay_seconds' => $delaySeconds,
                 'max_attempts' => $maxAttempts,
+                'request_id' => $metadata['request_id'] ?? null,
+                'correlation_id' => $metadata['correlation_id'] ?? null,
             ],
             context: $context,
         ));
@@ -329,5 +336,20 @@ final class MySqlQueue implements QueueWorkerStorageInterface
     {
         $name = gethostname();
         return is_string($name) && trim($name) !== '' ? $name : 'worker';
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function buildTraceMetadata(): array
+    {
+        $traceContext = $this->traceContextProvider->get();
+
+        return [
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'source' => $traceContext->source(),
+            'user_id' => $traceContext->userId(),
+        ];
     }
 }

@@ -21,8 +21,7 @@ final readonly class CreateRoleAction
         private CreateRoleHandler $createRoleHandler,
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

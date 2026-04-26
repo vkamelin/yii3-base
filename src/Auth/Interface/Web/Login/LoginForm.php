@@ -31,8 +31,7 @@ final class LoginForm
         private string $email,
         private string $password,
         private bool $remember,
-    ) {
-    }
+    ) {}
 
     public function validate(): bool
     {

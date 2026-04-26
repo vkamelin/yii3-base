@@ -8,6 +8,5 @@ final readonly class GetAuthenticatedUserCommand
 {
     public function __construct(
         public string $token,
-    ) {
-    }
+    ) {}
 }

@@ -26,8 +26,7 @@ final readonly class IndexAction
         private ActivityLogQueryInterface $query,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

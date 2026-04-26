@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Shared\Interface\Http\Middleware\CorsMiddleware;
-use App\Shared\Interface\Http\Middleware\AccessLogMiddleware;
+use App\Shared\Infrastructure\Logging\ErrorLogMiddleware;
+use App\Shared\Infrastructure\Logging\AccessLogMiddleware;
+use App\Shared\Infrastructure\Logging\RequestIdMiddleware;
+use App\Shared\Infrastructure\Logging\LogContext;
+use App\Shared\Infrastructure\Logging\LogContextSanitizer;
 use App\Api\Interface\Http\Middleware\ApiErrorMiddleware;
 use App\Shared\Interface\Http\Middleware\AuthenticationMiddleware;
 use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Api\Interface\Http\Middleware\JsonResponseMiddleware;
+use App\Shared\Interface\Http\Middleware\JsonBodyParserMiddleware;
 use App\Shared\Interface\Http\Middleware\RateLimitMiddleware;
 use App\Shared\Infrastructure\Audit\RequestAuditContext;
-use App\Shared\Interface\Http\Middleware\RequestIdMiddleware;
 use App\Shared\Interface\Http\Middleware\SelectiveCsrfTokenMiddleware;
 use App\Shared\Interface\Http\Middleware\WebErrorMiddleware;
 use App\Api\Interface\Http\Middleware\BearerTokenMiddleware;
@@ -30,10 +33,12 @@ return [
         'class' => MiddlewareDispatcher::class,
         'withMiddlewares()' => [
             [
-                ApiErrorMiddleware::class,
-                WebErrorMiddleware::class,
+                ErrorLogMiddleware::class,
                 RequestIdMiddleware::class,
                 AccessLogMiddleware::class,
+                ApiErrorMiddleware::class,
+                WebErrorMiddleware::class,
+                JsonBodyParserMiddleware::class,
                 JsonResponseMiddleware::class,
                 SessionMiddleware::class,
                 SelectiveCsrfTokenMiddleware::class,
@@ -44,6 +49,25 @@ return [
                 RequestCatcherMiddleware::class,
                 Router::class,
             ],
+        ],
+    ],
+
+    LogContextSanitizer::class => LogContextSanitizer::class,
+    LogContext::class => LogContext::class,
+
+    ErrorLogMiddleware::class => [
+        'class' => ErrorLogMiddleware::class,
+        '__construct()' => [
+            'logger' => Reference::to('logger.error'),
+            'logContext' => Reference::to(LogContext::class),
+        ],
+    ],
+
+    AccessLogMiddleware::class => [
+        'class' => AccessLogMiddleware::class,
+        '__construct()' => [
+            'logger' => Reference::to('logger.access'),
+            'logContext' => Reference::to(LogContext::class),
         ],
     ],
 
@@ -123,14 +147,10 @@ return [
         ],
     ],
 
-    CorsMiddleware::class => [
-        'class' => CorsMiddleware::class,
+    JsonBodyParserMiddleware::class => [
+        'class' => JsonBodyParserMiddleware::class,
         '__construct()' => [
-            'allowedOrigins' => [
-                'http://localhost',
-                'http://localhost:5173',
-            ],
-            'allowCredentials' => true,
+            'apiPrefixes' => $params['middleware']['api']['prefixes'] ?? ['/api', '/api/'],
         ],
     ],
 ];

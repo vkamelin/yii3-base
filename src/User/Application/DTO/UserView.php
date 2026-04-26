@@ -14,6 +14,5 @@ final readonly class UserView
         public string $createdAt,
         public string $updatedAt,
         public ?string $deletedAt,
-    ) {
-    }
+    ) {}
 }

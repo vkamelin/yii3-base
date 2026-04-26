@@ -24,8 +24,7 @@ final readonly class LoginAction
         private IssueApiTokenHandler $issueApiTokenHandler,
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

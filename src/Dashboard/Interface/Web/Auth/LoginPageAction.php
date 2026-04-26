@@ -24,8 +24,7 @@ final readonly class LoginPageAction
         private RedirectResponseFactory $redirectResponseFactory,
         private FlashInterface $flash,
         private CsrfTokenInterface $csrfToken,
-    ) {
-    }
+    ) {}
 
     public function __invoke(): ResponseInterface
     {
@@ -54,4 +53,3 @@ final readonly class LoginPageAction
         }
     }
 }
-

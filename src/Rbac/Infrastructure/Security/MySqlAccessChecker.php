@@ -21,8 +21,7 @@ final readonly class MySqlAccessChecker implements AccessCheckerInterface
 
     public function __construct(
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     public function userHasPermission(UserId $userId, string $permissionCode): bool
     {

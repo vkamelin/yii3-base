@@ -21,7 +21,7 @@ final class M260425120500CreatePermissionsTable implements RevertibleMigrationIn
                 `is_system` TINYINT(1) NOT NULL DEFAULT 0,
                 `created_at` DATETIME(6) NOT NULL,
                 `updated_at` DATETIME(6) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE UNIQUE INDEX `uq_permissions_code` ON `permissions` (`code`)");

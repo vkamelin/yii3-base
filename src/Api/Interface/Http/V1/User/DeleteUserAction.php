@@ -15,8 +15,7 @@ final readonly class DeleteUserAction
     public function __construct(
         private ChangeUserStatusHandler $changeUserStatusHandler,
         private ApiResponseFactory $responseFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @param string $id

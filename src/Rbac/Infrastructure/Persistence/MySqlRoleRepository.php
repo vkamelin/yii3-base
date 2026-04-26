@@ -22,8 +22,7 @@ final readonly class MySqlRoleRepository implements RoleRepositoryInterface
     public function __construct(
         private ConnectionInterface $connection,
         private RoleHydrator $hydrator,
-    ) {
-    }
+    ) {}
 
     public function save(Role $role): void
     {

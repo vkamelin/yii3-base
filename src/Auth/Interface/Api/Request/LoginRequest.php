@@ -63,8 +63,7 @@ final class LoginRequest
         private string $password,
         private ?string $tokenName,
         private array $errors,
-    ) {
-    }
+    ) {}
 
     public function isValid(): bool
     {

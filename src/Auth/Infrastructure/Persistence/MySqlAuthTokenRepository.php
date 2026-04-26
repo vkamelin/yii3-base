@@ -21,8 +21,7 @@ final readonly class MySqlAuthTokenRepository implements AuthTokenRepositoryInte
     public function __construct(
         private ConnectionInterface $connection,
         private AuthTokenHydrator $hydrator,
-    ) {
-    }
+    ) {}
 
     public function save(AuthToken $token): void
     {

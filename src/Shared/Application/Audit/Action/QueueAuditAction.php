@@ -12,7 +12,5 @@ final class QueueAuditAction
     public const JOB_FAILED = 'queue.job.failed';
     public const JOB_RETRIED = 'queue.job.retried';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

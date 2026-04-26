@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Shared\Interface\Http\Middleware;
 
@@ -18,8 +20,7 @@ final readonly class SelectiveCsrfTokenMiddleware implements MiddlewareInterface
     public function __construct(
         private CsrfTokenMiddleware $csrfTokenMiddleware,
         private array $excludedPrefixes = ['/api', '/api/'],
-    ) {
-    }
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

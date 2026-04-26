@@ -24,8 +24,7 @@ final readonly class CreateUserHandler
         private UserRepositoryInterface $users,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(CreateUserCommand $command): UserView
     {

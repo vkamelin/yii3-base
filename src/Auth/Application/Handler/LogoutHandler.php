@@ -22,8 +22,7 @@ final readonly class LogoutHandler
         private AuthTokenRepositoryInterface $tokens,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(LogoutCommand $command): void
     {

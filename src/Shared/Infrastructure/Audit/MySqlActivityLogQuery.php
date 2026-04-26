@@ -26,8 +26,7 @@ final readonly class MySqlActivityLogQuery implements ActivityLogQueryInterface
 
     public function __construct(
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     public function list(ActivityLogFilter $filter): ActivityLogPage
     {

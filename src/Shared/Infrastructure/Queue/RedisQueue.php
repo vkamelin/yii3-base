@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Queue;
 
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Infrastructure\Queue\Exception\InvalidJobPayloadException;
 use App\Shared\Infrastructure\Queue\Exception\QueueException;
 use Predis\ClientInterface;
@@ -31,6 +32,7 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
     public function __construct(
         private ClientInterface $redis,
         private JobSerializer $serializer,
+        private TraceContextProviderInterface $traceContextProvider,
         private int $defaultMaxAttempts = 3,
         private string $keyPrefix = 'queue',
     ) {}
@@ -71,6 +73,7 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
         }
 
         $job = $this->serializer->deserialize($payload);
+        $metadata = $this->serializer->extractMetadata($payload);
 
         return new ReservedJob(
             QueueJobId::fromString($id),
@@ -78,6 +81,7 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
             $job,
             $attempt,
             $maxAttempts,
+            $metadata,
         );
     }
 
@@ -94,7 +98,7 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
                     'id' => $job->id->toString(),
                     'attempt' => $job->attempt,
                     'max_attempts' => $job->maxAttempts,
-                    'payload' => $this->serializer->serialize($job->job),
+                    'payload' => $this->serializer->serialize($job->job, $job->metadata),
                     'last_error' => $lastError,
                 ],
                 max(0, $delaySeconds),
@@ -113,18 +117,21 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
         try {
             $this->redis->rpush(
                 $this->failedKey(),
-                json_encode(
-                    [
-                        'id' => $job->id->toString(),
-                        'type' => $job->type,
-                        'attempt' => $job->attempt,
-                        'max_attempts' => $job->maxAttempts,
-                        'payload' => $this->serializer->serialize($job->job),
-                        'failed_at' => (new \DateTimeImmutable())->format(DATE_ATOM),
-                        'last_error' => $lastError,
-                    ],
-                    JSON_THROW_ON_ERROR,
-                ),
+                [
+                    json_encode(
+                        [
+                            'id' => $job->id->toString(),
+                            'type' => $job->type,
+                            'attempt' => $job->attempt,
+                            'max_attempts' => $job->maxAttempts,
+                            'payload' => $this->serializer->serialize($job->job, $job->metadata),
+                            'metadata' => $job->metadata,
+                            'failed_at' => (new \DateTimeImmutable())->format(DATE_ATOM),
+                            'last_error' => $lastError,
+                        ],
+                        JSON_THROW_ON_ERROR,
+                    ),
+                ],
             );
         } catch (\Throwable $e) {
             throw new QueueException(
@@ -138,13 +145,14 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
     private function pushInternal(JobInterface $job, int $delaySeconds, int $maxAttempts): string
     {
         $id = QueueJobId::generate();
+        $metadata = $this->buildTraceMetadata();
 
         $this->pushMeta(
             [
                 'id' => $id->toString(),
                 'attempt' => 0,
                 'max_attempts' => max(1, $maxAttempts),
-                'payload' => $this->serializer->serialize($job),
+                'payload' => $this->serializer->serialize($job, $metadata),
             ],
             max(0, $delaySeconds),
         );
@@ -165,7 +173,7 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
                 return;
             }
 
-            $this->redis->rpush($this->pendingKey(), $encoded);
+            $this->redis->rpush($this->pendingKey(), [$encoded]);
         } catch (\Throwable $e) {
             throw new QueueException('Unable to push job to Redis queue.', 0, $e);
         }
@@ -183,9 +191,9 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
         }
 
         foreach ($items as $item) {
-            $removed = (int) $this->redis->zrem($this->delayedKey(), $item);
+            $removed = $this->redis->zrem($this->delayedKey(), $item);
             if ($removed === 1) {
-                $this->redis->rpush($this->pendingKey(), $item);
+                $this->redis->rpush($this->pendingKey(), [$item]);
             }
         }
     }
@@ -222,5 +230,20 @@ final readonly class RedisQueue implements QueueWorkerStorageInterface
     private function failedKey(): string
     {
         return $this->keyPrefix . ':failed';
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function buildTraceMetadata(): array
+    {
+        $traceContext = $this->traceContextProvider->get();
+
+        return [
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'source' => $traceContext->source(),
+            'user_id' => $traceContext->userId(),
+        ];
     }
 }

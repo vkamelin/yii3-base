@@ -12,6 +12,5 @@ final readonly class CreatePermissionCommand
         public string $groupCode,
         public ?string $description = null,
         public bool $isSystem = false,
-    ) {
-    }
+    ) {}
 }

@@ -19,8 +19,7 @@ final readonly class AuthApiResponseFactory
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
         private StreamFactoryInterface $streamFactory,
-    ) {
-    }
+    ) {}
 
     public function loginSuccess(AuthResult $user, ApiTokenResult $token): ResponseInterface
     {

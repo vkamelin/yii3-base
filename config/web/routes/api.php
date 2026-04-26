@@ -28,7 +28,6 @@ return [
             Route::get('/auth/me')
                 ->action(MeAction::class)
                 ->name('api.v1.auth.me'),
-
             Route::get('/users')
                 ->action(ListUsersAction::class)
                 ->name('api.v1.users.list'),
@@ -44,7 +43,6 @@ return [
             Route::delete('/users/{id}')
                 ->action(DeleteUserAction::class)
                 ->name('api.v1.users.delete'),
-
             Route::get('/roles')
                 ->action(ListRolesAction::class)
                 ->name('api.v1.roles.list'),

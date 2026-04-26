@@ -10,7 +10,5 @@ final class SystemAuditAction
     public const MIGRATION_EXECUTED = 'system.migration.executed';
     public const CONFIG_CHANGED = 'system.config.changed';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

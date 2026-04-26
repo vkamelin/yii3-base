@@ -19,8 +19,7 @@ final readonly class MySqlActivityLogger implements ActivityLoggerInterface
 
     public function __construct(
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     public function log(ActivityLogEntry $entry): void
     {

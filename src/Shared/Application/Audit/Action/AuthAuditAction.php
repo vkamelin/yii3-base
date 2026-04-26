@@ -15,7 +15,5 @@ final class AuthAuditAction
     public const PASSWORD_RESET_REQUESTED = 'auth.password.reset_requested';
     public const PASSWORD_RESET_COMPLETED = 'auth.password.reset_completed';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

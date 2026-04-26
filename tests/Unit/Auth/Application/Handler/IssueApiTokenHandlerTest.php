@@ -60,9 +60,7 @@ final class IssueApiTokenHandlerTest extends Unit
     private function createNullActivityLogger(): ActivityLoggerInterface
     {
         return new class implements ActivityLoggerInterface {
-            public function log(ActivityLogEntry $entry): void
-            {
-            }
+            public function log(ActivityLogEntry $entry): void {}
         };
     }
 }
@@ -71,8 +69,7 @@ final class InMemoryTokenUserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private User $user,
-    ) {
-    }
+    ) {}
 
     public function save(User $user): void
     {

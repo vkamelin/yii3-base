@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Interface\Http\Response;
 
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Interface\Http\RequestAttributes;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -18,13 +19,13 @@ final readonly class ApiResponseFactory
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
         private StreamFactoryInterface $streamFactory,
-    ) {
-    }
+        private TraceContextProviderInterface $traceContextProvider,
+    ) {}
 
     /**
      * @param array<string, mixed>|list<mixed>|null $data
      */
-    public function success(ServerRequestInterface $request, array|null $data, int $statusCode = 200): ResponseInterface
+    public function success(ServerRequestInterface $request, ?array $data, int $statusCode = 200): ResponseInterface
     {
         return $this->json($request, $statusCode, [
             'data' => $data,
@@ -58,6 +59,7 @@ final readonly class ApiResponseFactory
     public function json(ServerRequestInterface $request, int $statusCode, array $payload): ResponseInterface
     {
         $requestId = $this->requestId($request);
+        $correlationId = $this->correlationId($request);
         $payload['request_id'] = $requestId;
 
         $response = $this->responseFactory
@@ -68,6 +70,9 @@ final readonly class ApiResponseFactory
         if ($requestId !== null) {
             $response = $response->withHeader('X-Request-Id', $requestId);
         }
+        if ($correlationId !== null) {
+            $response = $response->withHeader('X-Correlation-Id', $correlationId);
+        }
 
         return $response;
     }
@@ -75,6 +80,20 @@ final readonly class ApiResponseFactory
     private function requestId(ServerRequestInterface $request): ?string
     {
         $requestId = $request->getAttribute(RequestAttributes::REQUEST_ID);
-        return is_string($requestId) && $requestId !== '' ? $requestId : null;
+        if (is_string($requestId) && $requestId !== '') {
+            return $requestId;
+        }
+
+        return $this->traceContextProvider->get()->requestId();
+    }
+
+    private function correlationId(ServerRequestInterface $request): ?string
+    {
+        $correlationId = $request->getAttribute(RequestAttributes::CORRELATION_ID);
+        if (is_string($correlationId) && $correlationId !== '') {
+            return $correlationId;
+        }
+
+        return $this->traceContextProvider->get()->correlationId();
     }
 }

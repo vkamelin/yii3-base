@@ -9,6 +9,5 @@ final readonly class AssignRoleCommand
     public function __construct(
         public string $userId,
         public string $roleCode,
-    ) {
-    }
+    ) {}
 }

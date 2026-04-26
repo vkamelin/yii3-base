@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Dashboard\Infrastructure\Asset\DatatablesAsset;
 use App\User\Application\DTO\UserListItem;
 use Yiisoft\Assets\AssetManager;
-use Yiisoft\Html\Html;
 use Yiisoft\View\WebView;
 
 /**

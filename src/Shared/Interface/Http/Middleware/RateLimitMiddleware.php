@@ -8,6 +8,7 @@ use App\Shared\Application\Audit\ActivityLogEntry;
 use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Audit\ActorContext;
 use App\Shared\Application\Audit\Action\ApiAuditAction;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Interface\Http\ApiErrorResponder;
 use App\Shared\Interface\Http\RateLimit\RateLimiterInterface;
 use App\Shared\Infrastructure\Audit\RequestAuditContext;
@@ -15,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 use function sha1;
 use function sprintf;
@@ -31,6 +33,8 @@ final readonly class RateLimitMiddleware implements MiddlewareInterface
         private ApiErrorResponder $apiErrorResponder,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
+        private TraceContextProviderInterface $traceContextProvider,
+        private LoggerInterface $logger,
         private int $limit = 60,
         private int $windowSeconds = 60,
         private string $keyPrefix = 'rate_limit:api:',
@@ -57,6 +61,7 @@ final readonly class RateLimitMiddleware implements MiddlewareInterface
         );
 
         if ($result->isLimited($this->limit)) {
+            $traceContext = $this->traceContextProvider->get();
             $context = $this->auditContext->fromRequest(
                 request: $request,
                 defaultSource: ActorContext::SOURCE_API,
@@ -73,6 +78,16 @@ final readonly class RateLimitMiddleware implements MiddlewareInterface
                 ],
                 context: $context,
             ));
+
+            $this->logger->warning('api.rate_limit.exceeded', [
+                'type' => 'rate_limit',
+                'request_id' => $traceContext->requestId(),
+                'correlation_id' => $traceContext->correlationId(),
+                'method' => $request->getMethod(),
+                'path' => $request->getUri()->getPath(),
+                'retry_after' => $result->retryAfter,
+                'source' => ActorContext::SOURCE_API,
+            ]);
 
             return $this->apiErrorResponder->error(
                 request: $request,

@@ -17,7 +17,7 @@ final class M260425120600CreateRolePermissionsTable implements RevertibleMigrati
                 `permission_id` CHAR(36) NOT NULL,
                 `created_at` DATETIME(6) NOT NULL,
                 PRIMARY KEY (`role_id`, `permission_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE INDEX `idx_role_permissions_permission_id` ON `role_permissions` (`permission_id`)");
@@ -25,12 +25,12 @@ final class M260425120600CreateRolePermissionsTable implements RevertibleMigrati
         $b->execute(
             "ALTER TABLE `role_permissions`
                 ADD CONSTRAINT `fk_role_permissions_role_id`
-                FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE"
+                FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE",
         );
         $b->execute(
             "ALTER TABLE `role_permissions`
                 ADD CONSTRAINT `fk_role_permissions_permission_id`
-                FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE"
+                FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE",
         );
     }
 

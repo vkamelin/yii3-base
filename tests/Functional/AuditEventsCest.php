@@ -18,14 +18,13 @@ use function json_encode;
 use function mb_strtolower;
 use function password_hash;
 use function sprintf;
-
-use const PASSWORD_DEFAULT;
-
 use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertIsString;
 use function PHPUnit\Framework\assertNotEmpty;
 use function PHPUnit\Framework\assertSame;
 use function PHPUnit\Framework\assertTrue;
+
+use const PASSWORD_DEFAULT;
 
 final class AuditEventsCest
 {
@@ -51,7 +50,12 @@ final class AuditEventsCest
         $requestId = '';
         $status = 0;
         for ($i = 0; $i < 80; $i++) {
-            $response = $this->sendJsonRequest($tester, 'GET', '/api/v1/auth/me');
+            $response = $this->sendJsonRequest($tester, 'POST', '/api/v1/auth/login', [
+                'email' => 'rate-limit@example.com',
+                'password' => 'definitely-invalid',
+            ], [
+                'X-Forwarded-For' => '198.51.100.77',
+            ]);
             $payload = $this->decodeJson($response->getBody()->getContents());
             $status = $response->getStatusCode();
             if ($status === 429) {

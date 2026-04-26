@@ -14,6 +14,5 @@ final readonly class ActivityLogPage
         public int $total,
         public int $page,
         public int $perPage,
-    ) {
-    }
+    ) {}
 }

@@ -10,8 +10,7 @@ final readonly class AuthApiErrorFactory
 {
     public function __construct(
         private AuthApiResponseFactory $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function invalidCredentials(): ResponseInterface
     {

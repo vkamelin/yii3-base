@@ -23,8 +23,7 @@ final readonly class UserReadRepository
 
     public function __construct(
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<UserListItem>

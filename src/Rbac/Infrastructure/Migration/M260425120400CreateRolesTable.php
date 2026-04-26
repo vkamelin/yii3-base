@@ -20,7 +20,7 @@ final class M260425120400CreateRolesTable implements RevertibleMigrationInterfac
                 `is_system` TINYINT(1) NOT NULL DEFAULT 0,
                 `created_at` DATETIME(6) NOT NULL,
                 `updated_at` DATETIME(6) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE UNIQUE INDEX `uq_roles_code` ON `roles` (`code`)");

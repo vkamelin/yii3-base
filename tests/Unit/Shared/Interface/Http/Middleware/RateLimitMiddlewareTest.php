@@ -6,6 +6,9 @@ namespace App\Tests\Unit\Shared\Interface\Http\Middleware;
 
 use App\Shared\Application\Audit\ActivityLogEntry;
 use App\Shared\Application\Audit\ActivityLoggerInterface;
+use App\Shared\Application\Tracing\TraceContext;
+use App\Shared\Application\Tracing\TraceContextInterface;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Interface\Http\ApiErrorResponder;
 use App\Shared\Interface\Http\Middleware\RateLimitMiddleware;
 use App\Shared\Interface\Http\RateLimit\RateLimitResult;
@@ -19,6 +22,7 @@ use HttpSoft\Message\StreamFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\NullLogger;
 use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
@@ -42,6 +46,13 @@ final class RateLimitMiddlewareTest extends Unit
             apiErrorResponder: new ApiErrorResponder($responseFactory, new StreamFactory()),
             activityLogger: $this->createNullActivityLogger(),
             auditContext: new RequestAuditContext(new RequestProvider()),
+            traceContextProvider: new class implements TraceContextProviderInterface {
+                public function get(): TraceContextInterface
+                {
+                    return new TraceContext('req-429', 'corr-429', null, TraceContext::SOURCE_API);
+                }
+            },
+            logger: new NullLogger(),
             limit: 3,
             windowSeconds: 60,
         );
@@ -65,9 +76,7 @@ final class RateLimitMiddlewareTest extends Unit
     private function createNullActivityLogger(): ActivityLoggerInterface
     {
         return new class implements ActivityLoggerInterface {
-            public function log(ActivityLogEntry $entry): void
-            {
-            }
+            public function log(ActivityLogEntry $entry): void {}
         };
     }
 }

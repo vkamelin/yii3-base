@@ -21,8 +21,7 @@ final class User
         private DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
         private ?DateTimeImmutable $deletedAt,
-    ) {
-    }
+    ) {}
 
     public static function create(
         UserId $id,

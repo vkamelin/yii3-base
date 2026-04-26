@@ -86,9 +86,7 @@ final class AssignRoleHandlerTest extends Unit
     private function createNullActivityLogger(): ActivityLoggerInterface
     {
         return new class implements ActivityLoggerInterface {
-            public function log(ActivityLogEntry $entry): void
-            {
-            }
+            public function log(ActivityLogEntry $entry): void {}
         };
     }
 }
@@ -97,8 +95,7 @@ final class InMemoryAssignableUserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private User $user,
-    ) {
-    }
+    ) {}
 
     public function save(User $user): void
     {
@@ -128,8 +125,7 @@ final class InMemoryAssignableRoleRepository implements RoleRepositoryInterface
 
     public function __construct(
         private ?Role $role,
-    ) {
-    }
+    ) {}
 
     public function save(Role $role): void
     {

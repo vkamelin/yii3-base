@@ -6,6 +6,4 @@ namespace App\Shared\Application\Exception;
 
 use RuntimeException;
 
-final class NotFoundException extends RuntimeException
-{
-}
+final class NotFoundException extends RuntimeException {}

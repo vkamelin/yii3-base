@@ -14,4 +14,3 @@ final readonly class WorkerOptions
         public string $queueName = 'mysql',
     ) {}
 }
-

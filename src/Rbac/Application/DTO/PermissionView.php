@@ -15,6 +15,5 @@ final readonly class PermissionView
         public bool $isSystem,
         public string $createdAt,
         public string $updatedAt,
-    ) {
-    }
+    ) {}
 }

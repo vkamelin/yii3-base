@@ -19,8 +19,7 @@ final readonly class ListUsersAction
     public function __construct(
         private UserReadRepository $userReadRepository,
         private ApiResponseFactory $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

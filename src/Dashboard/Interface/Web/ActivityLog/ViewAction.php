@@ -15,8 +15,7 @@ final readonly class ViewAction
         private DashboardViewRenderer $viewRenderer,
         private ActivityLogQueryInterface $query,
         private ResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(string $id): ResponseInterface
     {

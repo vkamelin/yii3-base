@@ -27,8 +27,7 @@ final readonly class MySqlRbacReadRepository
 
     public function __construct(
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<RoleView>

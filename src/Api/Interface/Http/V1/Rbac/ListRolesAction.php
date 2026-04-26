@@ -19,8 +19,7 @@ final readonly class ListRolesAction
     public function __construct(
         private MySqlRbacReadRepository $rbacReadRepository,
         private ApiResponseFactory $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

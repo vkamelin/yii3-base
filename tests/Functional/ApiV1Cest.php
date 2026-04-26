@@ -18,13 +18,12 @@ use function json_encode;
 use function mb_strtolower;
 use function password_hash;
 use function sprintf;
-
-use const PASSWORD_DEFAULT;
-
 use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertIsString;
 use function PHPUnit\Framework\assertNotEmpty;
 use function PHPUnit\Framework\assertSame;
+
+use const PASSWORD_DEFAULT;
 
 final class ApiV1Cest
 {

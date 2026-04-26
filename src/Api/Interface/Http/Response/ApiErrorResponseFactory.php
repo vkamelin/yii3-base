@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Interface\Http\Response;
 
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Interface\Http\RequestAttributes;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -18,8 +19,8 @@ final readonly class ApiErrorResponseFactory
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
         private StreamFactoryInterface $streamFactory,
-    ) {
-    }
+        private TraceContextProviderInterface $traceContextProvider,
+    ) {}
 
     /**
      * @param array<string, mixed>|null $details
@@ -34,6 +35,7 @@ final readonly class ApiErrorResponseFactory
         array $headers = [],
     ): ResponseInterface {
         $requestId = $this->requestId($request);
+        $correlationId = $this->correlationId($request);
 
         $payload = [
             'error' => [
@@ -51,6 +53,9 @@ final readonly class ApiErrorResponseFactory
 
         if ($requestId !== null) {
             $response = $response->withHeader('X-Request-Id', $requestId);
+        }
+        if ($correlationId !== null) {
+            $response = $response->withHeader('X-Correlation-Id', $correlationId);
         }
 
         foreach ($headers as $name => $value) {
@@ -101,6 +106,20 @@ final readonly class ApiErrorResponseFactory
     private function requestId(ServerRequestInterface $request): ?string
     {
         $requestId = $request->getAttribute(RequestAttributes::REQUEST_ID);
-        return is_string($requestId) && $requestId !== '' ? $requestId : null;
+        if (is_string($requestId) && $requestId !== '') {
+            return $requestId;
+        }
+
+        return $this->traceContextProvider->get()->requestId();
+    }
+
+    private function correlationId(ServerRequestInterface $request): ?string
+    {
+        $correlationId = $request->getAttribute(RequestAttributes::CORRELATION_ID);
+        if (is_string($correlationId) && $correlationId !== '') {
+            return $correlationId;
+        }
+
+        return $this->traceContextProvider->get()->correlationId();
     }
 }

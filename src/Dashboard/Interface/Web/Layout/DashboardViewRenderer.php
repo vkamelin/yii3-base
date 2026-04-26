@@ -11,8 +11,7 @@ final readonly class DashboardViewRenderer
 {
     public function __construct(
         private WebViewRenderer $viewRenderer,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<string, mixed> $parameters

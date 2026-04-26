@@ -60,28 +60,28 @@ foreach ($result->items as $item) {
             ['name' => 'date_to', 'label' => 'Date To', 'value' => $filter->dateTo ?? '', 'type' => 'datetime-local'],
             ['name' => 'per_page', 'label' => 'Per Page', 'value' => (string) $result->perPage, 'type' => 'text'],
         ];
-        $action = '/dashboard/activity-log';
-        require __DIR__ . '/../Layout/Partial/filter-form.php';
-        ?>
+$action = '/dashboard/activity-log';
+require __DIR__ . '/../Layout/Partial/filter-form.php';
+?>
     </div>
     <div class="col-12">
         <?php require __DIR__ . '/../Layout/Partial/table.php'; ?>
         <?php
-        $page = $result->page;
-        $perPage = $result->perPage;
-        $total = $result->total;
-        $path = '/dashboard/activity-log';
-        $query = [
-            'action' => $filter->action,
-            'actor_user_id' => $filter->actorUserId,
-            'entity_type' => $filter->entityType,
-            'request_id' => $filter->requestId,
-            'source' => $filter->source,
-            'date_from' => $filter->dateFrom,
-            'date_to' => $filter->dateTo,
-            'per_page' => $result->perPage,
-        ];
-        require __DIR__ . '/../Layout/Partial/pagination.php';
-        ?>
+$page = $result->page;
+$perPage = $result->perPage;
+$total = $result->total;
+$path = '/dashboard/activity-log';
+$query = [
+    'action' => $filter->action,
+    'actor_user_id' => $filter->actorUserId,
+    'entity_type' => $filter->entityType,
+    'request_id' => $filter->requestId,
+    'source' => $filter->source,
+    'date_from' => $filter->dateFrom,
+    'date_to' => $filter->dateTo,
+    'per_page' => $result->perPage,
+];
+require __DIR__ . '/../Layout/Partial/pagination.php';
+?>
     </div>
 </div>

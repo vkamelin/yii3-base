@@ -27,7 +27,7 @@ final class M260425121500CreateQueueJobsTable implements RevertibleMigrationInte
                 `last_error` TEXT NULL,
                 `created_at` DATETIME(6) NOT NULL,
                 `updated_at` DATETIME(6) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE INDEX `idx_queue_jobs_ready` ON `queue_jobs` (`queue`, `status`, `available_at`, `id`)");

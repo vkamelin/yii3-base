@@ -14,6 +14,7 @@ use Psr\Log\LoggerInterface;
 use function function_exists;
 use function memory_get_usage;
 use function microtime;
+use function round;
 use function sprintf;
 use function usleep;
 
@@ -75,12 +76,14 @@ final class Worker
             }
 
             $this->logger->info(
-                'Queue job reserved.',
+                'queue.job.started',
                 [
+                    'event' => 'queue.job.started',
                     'job_id' => $reservedJob->id->toString(),
-                    'type' => $reservedJob->type,
+                    'job_name' => $reservedJob->type,
                     'attempt' => $reservedJob->attempt,
-                    'max_attempts' => $reservedJob->maxAttempts,
+                    'request_id' => $reservedJob->metadata['request_id'] ?? null,
+                    'correlation_id' => $reservedJob->metadata['correlation_id'] ?? null,
                     'queue' => $options->queueName,
                 ],
             );
@@ -98,10 +101,14 @@ final class Worker
             ));
 
             try {
+                $jobStartedAt = microtime(true);
                 $handler = $this->registry->resolveHandler($reservedJob->job, $this->container);
                 $handler->handle($reservedJob->job);
                 $queue->markDone($reservedJob);
                 $processed++;
+
+                $durationMs = round((microtime(true) - $jobStartedAt) * 1000, 3);
+
                 $this->activityLogger->log(ActivityLogEntry::system(
                     action: QueueAuditAction::JOB_COMPLETED,
                     entityType: 'queue_job',
@@ -109,12 +116,28 @@ final class Worker
                     payload: [
                         'job_type' => $reservedJob->type,
                         'attempt' => $reservedJob->attempt,
+                        'duration_ms' => $durationMs,
                     ],
                     context: ActorContext::system(ActorContext::SOURCE_QUEUE),
                 ));
+
+                $this->logger->info(
+                    'queue.job.completed',
+                    [
+                        'event' => 'queue.job.completed',
+                        'job_id' => $reservedJob->id->toString(),
+                        'job_name' => $reservedJob->type,
+                        'attempt' => $reservedJob->attempt,
+                        'duration_ms' => $durationMs,
+                        'request_id' => $reservedJob->metadata['request_id'] ?? null,
+                        'correlation_id' => $reservedJob->metadata['correlation_id'] ?? null,
+                        'queue' => $options->queueName,
+                    ],
+                );
             } catch (\Throwable $e) {
                 $failed++;
                 $message = $this->formatError($e);
+                $durationMs = round((microtime(true) - $jobStartedAt) * 1000, 3);
 
                 if ($reservedJob->attempt >= $reservedJob->maxAttempts) {
                     $queue->markFailed($reservedJob, $message);
@@ -127,6 +150,7 @@ final class Worker
                             'attempt' => $reservedJob->attempt,
                             'max_attempts' => $reservedJob->maxAttempts,
                             'error' => $message,
+                            'duration_ms' => $durationMs,
                         ],
                         context: ActorContext::system(ActorContext::SOURCE_QUEUE),
                     ));
@@ -141,18 +165,23 @@ final class Worker
                             'attempt' => $reservedJob->attempt,
                             'max_attempts' => $reservedJob->maxAttempts,
                             'error' => $message,
+                            'duration_ms' => $durationMs,
                         ],
                         context: ActorContext::system(ActorContext::SOURCE_QUEUE),
                     ));
                 }
 
                 $this->logger->error(
-                    'Queue job processing failed.',
+                    'queue.job.failed',
                     [
+                        'event' => 'queue.job.failed',
                         'job_id' => $reservedJob->id->toString(),
-                        'type' => $reservedJob->type,
+                        'job_name' => $reservedJob->type,
                         'attempt' => $reservedJob->attempt,
                         'max_attempts' => $reservedJob->maxAttempts,
+                        'duration_ms' => $durationMs,
+                        'request_id' => $reservedJob->metadata['request_id'] ?? null,
+                        'correlation_id' => $reservedJob->metadata['correlation_id'] ?? null,
                         'error' => $message,
                     ],
                 );

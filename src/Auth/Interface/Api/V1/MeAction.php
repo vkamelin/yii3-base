@@ -22,8 +22,7 @@ final readonly class MeAction
         private GetAuthenticatedUserHandler $getAuthenticatedUserHandler,
         private AuthApiResponseFactory $responseFactory,
         private AuthApiErrorFactory $errorFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
@@ -37,7 +36,7 @@ final readonly class MeAction
             return $this->responseFactory->meSuccess($user);
         } catch (AccessDeniedException $e) {
             return $this->errorFactory->forbidden($e->getMessage());
-        } catch (InvalidCredentialsException | ValidationException) {
+        } catch (InvalidCredentialsException|ValidationException) {
             return $this->errorFactory->unauthorized('INVALID_TOKEN', 'Invalid token.');
         }
     }

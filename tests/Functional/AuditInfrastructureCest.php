@@ -20,7 +20,6 @@ use Yiisoft\Db\Mysql\Driver;
 
 use function getenv;
 use function sprintf;
-
 use function PHPUnit\Framework\assertGreaterThanOrEqual;
 use function PHPUnit\Framework\assertNotNull;
 use function PHPUnit\Framework\assertSame;

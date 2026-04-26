@@ -25,7 +25,7 @@ final class M260425120800CreateActivityLogsTable implements RevertibleMigrationI
                 `source` VARCHAR(32) NOT NULL,
                 `payload` JSON NULL,
                 `created_at` DATETIME(6) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE INDEX `idx_activity_logs_actor_user_id` ON `activity_logs` (`actor_user_id`)");

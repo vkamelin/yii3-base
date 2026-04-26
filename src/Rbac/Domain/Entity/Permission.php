@@ -20,8 +20,7 @@ final class Permission
         private bool $isSystem,
         private DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
-    ) {
-    }
+    ) {}
 
     public static function create(
         PermissionId $id,

@@ -17,7 +17,7 @@ final class M260425120700CreateUserRolesTable implements RevertibleMigrationInte
                 `role_id` CHAR(36) NOT NULL,
                 `created_at` DATETIME(6) NOT NULL,
                 PRIMARY KEY (`user_id`, `role_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE INDEX `idx_user_roles_role_id` ON `user_roles` (`role_id`)");
@@ -25,12 +25,12 @@ final class M260425120700CreateUserRolesTable implements RevertibleMigrationInte
         $b->execute(
             "ALTER TABLE `user_roles`
                 ADD CONSTRAINT `fk_user_roles_user_id`
-                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE"
+                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE",
         );
         $b->execute(
             "ALTER TABLE `user_roles`
                 ADD CONSTRAINT `fk_user_roles_role_id`
-                FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE"
+                FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE",
         );
     }
 

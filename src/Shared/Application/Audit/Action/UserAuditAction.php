@@ -11,7 +11,5 @@ final class UserAuditAction
     public const EMAIL_CHANGED = 'user.email.changed';
     public const STATUS_CHANGED = 'user.status.changed';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

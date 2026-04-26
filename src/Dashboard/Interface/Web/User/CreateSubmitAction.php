@@ -32,8 +32,7 @@ final readonly class CreateSubmitAction
         private ChangeUserStatusHandler $changeUserStatusHandler,
         private RedirectResponseFactory $redirectResponseFactory,
         private FlashInterface $flash,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

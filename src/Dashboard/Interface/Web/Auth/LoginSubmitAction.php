@@ -33,8 +33,7 @@ final readonly class LoginSubmitAction
         private DashboardViewRenderer $viewRenderer,
         private FlashInterface $flash,
         private CsrfTokenInterface $csrfToken,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
@@ -62,7 +61,7 @@ final readonly class LoginSubmitAction
 
             $this->flash->set('success', 'Welcome to Dashboard.');
             return $this->redirectResponseFactory->to('/dashboard');
-        } catch (InvalidCredentialsException | AccessDeniedException | ValidationException) {
+        } catch (InvalidCredentialsException|AccessDeniedException|ValidationException) {
             $form->addError('Invalid credentials.');
             return $this->render($form);
         }
@@ -85,4 +84,3 @@ final readonly class LoginSubmitAction
         }
     }
 }
-

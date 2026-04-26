@@ -11,6 +11,5 @@ final readonly class ListRolesQuery
         public int $perPage = 20,
         public ?string $search = null,
         public ?bool $isSystem = null,
-    ) {
-    }
+    ) {}
 }

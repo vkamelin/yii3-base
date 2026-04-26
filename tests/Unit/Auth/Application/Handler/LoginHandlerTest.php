@@ -75,9 +75,7 @@ final class LoginHandlerTest extends Unit
     private function createNullActivityLogger(): ActivityLoggerInterface
     {
         return new class implements ActivityLoggerInterface {
-            public function log(ActivityLogEntry $entry): void
-            {
-            }
+            public function log(ActivityLogEntry $entry): void {}
         };
     }
 }
@@ -86,8 +84,7 @@ final class InMemoryUserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private User $user,
-    ) {
-    }
+    ) {}
 
     public function save(User $user): void
     {
@@ -115,8 +112,7 @@ final class InMemoryCredentialsRepository implements UserCredentialsRepositoryIn
     public function __construct(
         private UserId $userId,
         private PasswordHash $passwordHash,
-    ) {
-    }
+    ) {}
 
     public function findPasswordHashByUserId(UserId $userId): ?PasswordHash
     {

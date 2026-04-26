@@ -2,26 +2,37 @@
 
 declare(strict_types=1);
 
-use Psr\Log\LoggerInterface;
-use Monolog\Handler\StreamHandler;
+use App\Shared\Infrastructure\Logging\MonologLoggerFactory;
+use App\Shared\Infrastructure\Logging\JsonLogFormatter;
 use Monolog\Level;
-use Monolog\Logger;
+use Yiisoft\Definitions\Reference;
 
 /** @var array $params */
 
 return [
-    LoggerInterface::class => static function () use ($params): LoggerInterface {
-        $logFile = rtrim($params['app']['runtimePath'], '/\\') . '/logs/app.log';
+    JsonLogFormatter::class => JsonLogFormatter::class,
 
-        $directory = dirname($logFile);
+    MonologLoggerFactory::class => [
+        'class' => MonologLoggerFactory::class,
+        '__construct()' => [
+            'runtimePath' => $params['app']['runtimePath'],
+            'jsonLogFormatter' => Reference::to(JsonLogFormatter::class),
+        ],
+    ],
 
-        if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
-            throw new \RuntimeException(sprintf('Unable to create log directory: %s', $directory));
-        }
-
-        $logger = new Logger($params['app']['name']);
-        $logger->pushHandler(new StreamHandler($logFile, Level::Debug));
-
-        return $logger;
-    },
+    'logger.app' => static fn(MonologLoggerFactory $factory): \Psr\Log\LoggerInterface => $factory->create(
+        channel: 'app',
+        fileName: 'app.log',
+        level: Level::Info,
+    ),
+    'logger.access' => static fn(MonologLoggerFactory $factory): \Psr\Log\LoggerInterface => $factory->create(
+        channel: 'access',
+        fileName: 'access.log',
+        level: Level::Info,
+    ),
+    'logger.error' => static fn(MonologLoggerFactory $factory): \Psr\Log\LoggerInterface => $factory->create(
+        channel: 'error',
+        fileName: 'error.log',
+        level: Level::Error,
+    ),
 ];

@@ -11,6 +11,5 @@ final readonly class CreateRoleCommand
         public string $name,
         public ?string $description = null,
         public bool $isSystem = false,
-    ) {
-    }
+    ) {}
 }

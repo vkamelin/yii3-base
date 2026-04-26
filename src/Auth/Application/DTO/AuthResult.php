@@ -11,6 +11,5 @@ final readonly class AuthResult
         public string $email,
         public string $name,
         public string $status,
-    ) {
-    }
+    ) {}
 }

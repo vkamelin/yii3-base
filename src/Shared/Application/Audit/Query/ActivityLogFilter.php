@@ -16,6 +16,5 @@ final readonly class ActivityLogFilter
         public ?string $source = null,
         public ?string $dateFrom = null,
         public ?string $dateTo = null,
-    ) {
-    }
+    ) {}
 }

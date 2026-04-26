@@ -75,9 +75,7 @@ final class CreatePermissionHandlerTest extends Unit
     private function createNullActivityLogger(): ActivityLoggerInterface
     {
         return new class implements ActivityLoggerInterface {
-            public function log(ActivityLogEntry $entry): void
-            {
-            }
+            public function log(ActivityLogEntry $entry): void {}
         };
     }
 }

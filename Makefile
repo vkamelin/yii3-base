@@ -18,6 +18,8 @@ else
 endif
 
 export COMPOSE_PROJECT_NAME=${STACK_NAME}
+export DOCKER_CONFIG := $(CURDIR)/.docker
+
 DOCKER_COMPOSE_DEV := docker compose -f docker/compose.yml -f docker/dev/compose.yml
 DOCKER_COMPOSE_TEST := docker compose -f docker/compose.yml -f docker/test/compose.yml
 SUPERVISORCTL := $(DOCKER_COMPOSE_DEV) exec app supervisorctl

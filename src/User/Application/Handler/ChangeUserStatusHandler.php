@@ -25,8 +25,7 @@ final readonly class ChangeUserStatusHandler
         private UserRepositoryInterface $users,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ChangeUserStatusCommand $command): UserView
     {

@@ -20,8 +20,7 @@ final readonly class MySqlUserCredentialsRepository implements UserCredentialsRe
 
     public function __construct(
         private ConnectionInterface $connection,
-    ) {
-    }
+    ) {}
 
     public function findPasswordHashByUserId(UserId $userId): ?PasswordHash
     {

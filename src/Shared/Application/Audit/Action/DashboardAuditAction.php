@@ -10,7 +10,5 @@ final class DashboardAuditAction
     public const LOGIN_FAILED = 'dashboard.login.failed';
     public const ACCESS_DENIED = 'dashboard.access.denied';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

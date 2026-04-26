@@ -12,4 +12,3 @@ final readonly class WorkerResult
         public string $stopReason,
     ) {}
 }
-

@@ -17,8 +17,7 @@ final readonly class LoginPageAction
         private AuthSessionInterface $authSession,
         private RedirectResponseFactory $redirectResponseFactory,
         private CsrfTokenInterface $csrfToken,
-    ) {
-    }
+    ) {}
 
     public function __invoke(): ResponseInterface
     {

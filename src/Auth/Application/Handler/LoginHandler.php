@@ -31,8 +31,7 @@ final readonly class LoginHandler
         private PasswordHasherInterface $passwordHasher,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(LoginCommand $command): AuthResult
     {

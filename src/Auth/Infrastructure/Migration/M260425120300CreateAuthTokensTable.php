@@ -24,7 +24,7 @@ final class M260425120300CreateAuthTokensTable implements RevertibleMigrationInt
                 `revoked_at` DATETIME(6) NULL,
                 `created_at` DATETIME(6) NOT NULL,
                 `updated_at` DATETIME(6) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE UNIQUE INDEX `uq_auth_tokens_token_hash` ON `auth_tokens` (`token_hash`)");
@@ -33,13 +33,13 @@ final class M260425120300CreateAuthTokensTable implements RevertibleMigrationInt
         $b->execute("CREATE INDEX `idx_auth_tokens_expires_at` ON `auth_tokens` (`expires_at`)");
         $b->execute("CREATE INDEX `idx_auth_tokens_revoked_at` ON `auth_tokens` (`revoked_at`)");
         $b->execute(
-            "CREATE INDEX `idx_auth_tokens_active_lookup` ON `auth_tokens` (`user_id`, `type`, `revoked_at`, `expires_at`)"
+            "CREATE INDEX `idx_auth_tokens_active_lookup` ON `auth_tokens` (`user_id`, `type`, `revoked_at`, `expires_at`)",
         );
 
         $b->execute(
             "ALTER TABLE `auth_tokens`
                 ADD CONSTRAINT `fk_auth_tokens_user_id`
-                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE"
+                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE",
         );
     }
 

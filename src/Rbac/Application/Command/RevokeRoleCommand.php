@@ -9,6 +9,5 @@ final readonly class RevokeRoleCommand
     public function __construct(
         public string $userId,
         public string $roleCode,
-    ) {
-    }
+    ) {}
 }

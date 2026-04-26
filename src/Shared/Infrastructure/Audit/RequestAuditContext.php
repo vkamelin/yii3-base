@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Audit;
 
 use App\Shared\Application\Audit\ActorContext;
+use App\Shared\Application\Tracing\TraceContext;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Interface\Http\RequestAttributes;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\RequestProvider\RequestNotSetException;
 use Yiisoft\RequestProvider\RequestProviderInterface;
 
-use function is_array;
 use function is_string;
 use function str_starts_with;
 use function strtok;
@@ -19,19 +20,23 @@ use function trim;
 final readonly class RequestAuditContext
 {
     public function __construct(
-        private RequestProviderInterface $requestProvider,
-    ) {
-    }
+        private ?RequestProviderInterface $requestProvider = null,
+        private ?TraceContextProviderInterface $traceContextProvider = null,
+    ) {}
 
     public function actor(
         string $defaultSource = ActorContext::SOURCE_SYSTEM,
         string $defaultActorType = ActorContext::ACTOR_SYSTEM,
         ?string $fallbackUserId = null,
     ): ActorContext {
+        if ($this->requestProvider === null) {
+            return $this->actorWithoutRequest($defaultSource, $defaultActorType, $fallbackUserId);
+        }
+
         try {
             $request = $this->requestProvider->get();
         } catch (RequestNotSetException) {
-            return new ActorContext($fallbackUserId, $defaultActorType, $defaultSource);
+            return $this->actorWithoutRequest($defaultSource, $defaultActorType, $fallbackUserId);
         }
 
         return $this->fromRequest($request, $defaultSource, $defaultActorType, $fallbackUserId);
@@ -43,15 +48,16 @@ final readonly class RequestAuditContext
         string $defaultActorType = ActorContext::ACTOR_SYSTEM,
         ?string $fallbackUserId = null,
     ): ActorContext {
+        $traceContext = $this->traceContextProvider?->get();
         $source = $this->resolveSource($request, $defaultSource);
         $requestId = $this->stringAttribute($request, RequestAttributes::REQUEST_ID);
         $userId = $this->stringAttribute($request, RequestAttributes::USER_ID) ?? $fallbackUserId;
 
         return new ActorContext(
-            userId: $userId,
+            userId: $userId ?? $traceContext?->userId(),
             actorType: $defaultActorType,
-            source: $source,
-            requestId: $requestId,
+            source: $source !== '' ? $source : ($traceContext?->source() ?? $defaultSource),
+            requestId: $requestId ?? $traceContext?->requestId(),
             ip: $this->resolveIp($request),
             userAgent: $this->normalizeNullableString($request->getHeaderLine('User-Agent')),
         );
@@ -71,6 +77,10 @@ final readonly class RequestAuditContext
 
     public function path(): ?string
     {
+        if ($this->requestProvider === null) {
+            return null;
+        }
+
         try {
             $request = $this->requestProvider->get();
         } catch (RequestNotSetException) {
@@ -85,11 +95,11 @@ final readonly class RequestAuditContext
     {
         $path = $request->getUri()->getPath();
         if (str_starts_with($path, '/api')) {
-            return ActorContext::SOURCE_API;
+            return TraceContext::SOURCE_API;
         }
 
         if (str_starts_with($path, '/dashboard') || $path === '/login' || $path === '/logout') {
-            return ActorContext::SOURCE_WEB;
+            return TraceContext::SOURCE_WEB;
         }
 
         return $default;
@@ -106,10 +116,6 @@ final readonly class RequestAuditContext
         }
 
         $serverParams = $request->getServerParams();
-        if (!is_array($serverParams)) {
-            return null;
-        }
-
         $remoteAddress = $serverParams['REMOTE_ADDR'] ?? null;
         return $this->normalizeNullableString(is_string($remoteAddress) ? $remoteAddress : null);
     }
@@ -127,5 +133,22 @@ final readonly class RequestAuditContext
 
         $value = trim($value);
         return $value === '' ? null : $value;
+    }
+
+    private function actorWithoutRequest(
+        string $defaultSource,
+        string $defaultActorType,
+        ?string $fallbackUserId,
+    ): ActorContext {
+        $traceContext = $this->traceContextProvider?->get();
+        $traceSource = $traceContext?->source();
+        $source = $traceSource !== null && $traceSource !== '' ? $traceSource : $defaultSource;
+
+        return new ActorContext(
+            userId: $traceContext?->userId() ?? $fallbackUserId,
+            actorType: $defaultActorType,
+            source: $source,
+            requestId: $traceContext?->requestId(),
+        );
     }
 }

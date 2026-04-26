@@ -13,8 +13,7 @@ final readonly class LogoutAction
     public function __construct(
         private AuthSessionInterface $authSession,
         private RedirectResponseFactory $redirectResponseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(): ResponseInterface
     {

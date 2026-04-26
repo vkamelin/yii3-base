@@ -18,13 +18,13 @@ final class M260425120200CreateUserCredentialsTable implements RevertibleMigrati
                 `password_changed_at` DATETIME(6) NULL,
                 `created_at` DATETIME(6) NOT NULL,
                 `updated_at` DATETIME(6) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute(
             "ALTER TABLE `user_credentials`
                 ADD CONSTRAINT `fk_user_credentials_user_id`
-                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE"
+                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE",
         );
     }
 

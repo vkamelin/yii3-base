@@ -12,7 +12,5 @@ final class ApiAuditAction
     public const TOKEN_AUTH_FAILED = 'api.token.auth.failed';
     public const RATE_LIMIT_EXCEEDED = 'api.rate_limit.exceeded';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

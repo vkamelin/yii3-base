@@ -19,8 +19,7 @@ final readonly class ListAction
     public function __construct(
         private DashboardViewRenderer $viewRenderer,
         private UserReadRepository $userReadRepository,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
@@ -54,4 +53,3 @@ final readonly class ListAction
         ]);
     }
 }
-

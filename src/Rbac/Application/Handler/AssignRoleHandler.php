@@ -25,8 +25,7 @@ final readonly class AssignRoleHandler
         private RoleRepositoryInterface $roles,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(AssignRoleCommand $command): void
     {

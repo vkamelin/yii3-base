@@ -16,4 +16,3 @@ final readonly class JobTypeDefinition
         public string $handlerClass,
     ) {}
 }
-

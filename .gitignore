@@ -21,6 +21,7 @@ Thumbs.db
 
 # composer vendor dir
 /vendor
+/.docker
 
 # Codeception C3
 c3.php

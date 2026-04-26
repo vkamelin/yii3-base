@@ -25,8 +25,7 @@ final readonly class CreateUserAction
         private CreateUserHandler $createUserHandler,
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

@@ -12,6 +12,5 @@ final readonly class ListPermissionsQuery
         public ?string $search = null,
         public ?string $groupCode = null,
         public ?bool $isSystem = null,
-    ) {
-    }
+    ) {}
 }

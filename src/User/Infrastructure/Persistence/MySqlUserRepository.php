@@ -19,8 +19,7 @@ final readonly class MySqlUserRepository implements UserRepositoryInterface
     public function __construct(
         private ConnectionInterface $connection,
         private UserHydrator $hydrator,
-    ) {
-    }
+    ) {}
 
     public function save(User $user): void
     {

@@ -11,6 +11,5 @@ final readonly class ApiTokenResult
         public string $plainToken,
         public string $tokenType,
         public ?string $expiresAt,
-    ) {
-    }
+    ) {}
 }

@@ -30,8 +30,7 @@ final readonly class IssueApiTokenHandler
         private TokenGeneratorInterface $tokenGenerator,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(IssueApiTokenCommand $command): ApiTokenResult
     {

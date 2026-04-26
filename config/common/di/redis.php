@@ -32,7 +32,7 @@ return [
         return $client;
     },
 
-    CacheInterface::class => static fn (ClientInterface $redis): RedisCache => new RedisCache($redis),
+    CacheInterface::class => static fn(ClientInterface $redis): RedisCache => new RedisCache($redis),
 
     RateLimiterInterface::class => RedisRateLimiter::class,
 ];

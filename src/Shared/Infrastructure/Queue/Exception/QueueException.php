@@ -6,7 +6,4 @@ namespace App\Shared\Infrastructure\Queue\Exception;
 
 use RuntimeException;
 
-class QueueException extends RuntimeException
-{
-}
-
+class QueueException extends RuntimeException {}

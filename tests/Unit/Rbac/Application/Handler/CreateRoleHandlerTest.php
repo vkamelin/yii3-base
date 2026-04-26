@@ -17,7 +17,6 @@ use App\Shared\Application\Exception\ValidationException;
 use App\Shared\Infrastructure\Audit\RequestAuditContext;
 use App\User\Domain\ValueObject\UserId;
 use Codeception\Test\Unit;
-use DateTimeImmutable;
 use Yiisoft\RequestProvider\RequestProvider;
 
 use function PHPUnit\Framework\assertSame;
@@ -74,9 +73,7 @@ final class CreateRoleHandlerTest extends Unit
     private function createNullActivityLogger(): ActivityLoggerInterface
     {
         return new class implements ActivityLoggerInterface {
-            public function log(ActivityLogEntry $entry): void
-            {
-            }
+            public function log(ActivityLogEntry $entry): void {}
         };
     }
 }

@@ -26,7 +26,5 @@ final class AdminAuditAction
     public const ACTIVITY_LOG_VIEWED = 'admin.activity_log.viewed';
     public const ACTIVITY_LOG_EXPORTED = 'admin.activity_log.exported';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

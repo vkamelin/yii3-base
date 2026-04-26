@@ -11,6 +11,5 @@ final readonly class ListUsersQuery
         public int $perPage = 20,
         public ?string $search = null,
         public ?string $status = null,
-    ) {
-    }
+    ) {}
 }

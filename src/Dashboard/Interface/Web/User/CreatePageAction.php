@@ -11,8 +11,7 @@ final readonly class CreatePageAction
 {
     public function __construct(
         private DashboardViewRenderer $viewRenderer,
-    ) {
-    }
+    ) {}
 
     public function __invoke(): ResponseInterface
     {

@@ -16,8 +16,7 @@ final readonly class MeAction
     public function __construct(
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

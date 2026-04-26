@@ -15,8 +15,7 @@ final readonly class YiiSessionAuthStorage implements AuthSessionInterface
 
     public function __construct(
         private SessionInterface $session,
-    ) {
-    }
+    ) {}
 
     public function login(string $userId): void
     {

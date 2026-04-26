@@ -14,4 +14,3 @@ interface QueueWorkerStorageInterface extends QueueInterface
 
     public function markFailed(ReservedJob $job, string $lastError): void;
 }
-

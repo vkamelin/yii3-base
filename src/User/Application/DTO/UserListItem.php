@@ -13,6 +13,5 @@ final readonly class UserListItem
         public string $status,
         public string $createdAt,
         public string $updatedAt,
-    ) {
-    }
+    ) {}
 }

@@ -22,6 +22,5 @@ final readonly class ActivityLogView
         public string $source,
         public ?array $payload,
         public string $createdAt,
-    ) {
-    }
+    ) {}
 }

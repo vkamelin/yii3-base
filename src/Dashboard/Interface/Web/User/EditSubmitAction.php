@@ -39,8 +39,7 @@ final readonly class EditSubmitAction
         private RedirectResponseFactory $redirectResponseFactory,
         private ResponseFactoryInterface $responseFactory,
         private FlashInterface $flash,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request, string $id): ResponseInterface
     {
@@ -103,4 +102,3 @@ final readonly class EditSubmitAction
         return $this->redirectResponseFactory->to('/dashboard/users');
     }
 }
-

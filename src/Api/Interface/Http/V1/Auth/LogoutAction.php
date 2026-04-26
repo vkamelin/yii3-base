@@ -20,8 +20,7 @@ final readonly class LogoutAction
         private LogoutHandler $logoutHandler,
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {

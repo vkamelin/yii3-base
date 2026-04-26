@@ -19,8 +19,7 @@ final class Role
         private bool $isSystem,
         private DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
-    ) {
-    }
+    ) {}
 
     public static function create(
         RoleId $id,

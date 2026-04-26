@@ -10,6 +10,5 @@ final readonly class UserPermissionView
         public string $userId,
         public string $roleCode,
         public string $permissionCode,
-    ) {
-    }
+    ) {}
 }

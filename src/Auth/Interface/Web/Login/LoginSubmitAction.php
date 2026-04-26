@@ -26,8 +26,7 @@ final readonly class LoginSubmitAction
         private RedirectResponseFactory $redirectResponseFactory,
         private WebViewRenderer $viewRenderer,
         private CsrfTokenInterface $csrfToken,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
@@ -47,7 +46,7 @@ final readonly class LoginSubmitAction
 
             $this->authSession->login($result->userId);
             return $this->redirectResponseFactory->to('/');
-        } catch (InvalidCredentialsException | AccessDeniedException | ValidationException) {
+        } catch (InvalidCredentialsException|AccessDeniedException|ValidationException) {
             $form->addError('Invalid credentials.');
             return $this->render($form);
         }

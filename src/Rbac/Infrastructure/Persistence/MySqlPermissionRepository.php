@@ -24,8 +24,7 @@ final readonly class MySqlPermissionRepository implements PermissionRepositoryIn
     public function __construct(
         private ConnectionInterface $connection,
         private PermissionHydrator $hydrator,
-    ) {
-    }
+    ) {}
 
     public function save(Permission $permission): void
     {

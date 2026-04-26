@@ -11,8 +11,7 @@ final readonly class RedirectResponseFactory
 {
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function to(string $path, int $statusCode = 302): ResponseInterface
     {

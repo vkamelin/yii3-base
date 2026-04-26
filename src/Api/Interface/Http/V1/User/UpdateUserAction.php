@@ -29,8 +29,7 @@ final readonly class UpdateUserAction
         private ChangeUserStatusHandler $changeUserStatusHandler,
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @param string $id

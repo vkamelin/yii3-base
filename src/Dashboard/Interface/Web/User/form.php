@@ -56,8 +56,8 @@ use Yiisoft\Html\Html;
                 <select id="status" class="form-select" name="status">
                     <?php
                     $status = $form['status'] ?? 'active';
-                    $statuses = ['active' => 'Active', 'blocked' => 'Blocked', 'pending' => 'Pending'];
-                    ?>
+$statuses = ['active' => 'Active', 'blocked' => 'Blocked', 'pending' => 'Pending'];
+?>
                     <?php foreach ($statuses as $value => $label): ?>
                         <option value="<?= Html::encode($value) ?>" <?= $status === $value ? 'selected' : '' ?>>
                             <?= Html::encode($label) ?>

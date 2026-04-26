@@ -14,6 +14,5 @@ final readonly class UserCreated
         public UserId $userId,
         public Email $email,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 }

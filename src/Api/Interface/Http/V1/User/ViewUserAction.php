@@ -18,8 +18,7 @@ final readonly class ViewUserAction
         private UserReadRepository $userReadRepository,
         private ApiResponseFactory $responseFactory,
         private ApiErrorResponseFactory $errorResponseFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @param string $id

@@ -19,8 +19,7 @@ final readonly class ListAction
     public function __construct(
         private DashboardViewRenderer $viewRenderer,
         private MySqlRbacReadRepository $readRepository,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
@@ -64,4 +63,3 @@ final readonly class ListAction
         ]);
     }
 }
-

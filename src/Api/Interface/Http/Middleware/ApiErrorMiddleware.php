@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\Interface\Http\Middleware;
 
 use App\Api\Interface\Http\Response\ApiErrorResponseFactory;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
 use App\Shared\Application\Exception\AccessDeniedException;
 use App\Shared\Application\Exception\ConflictException;
 use App\Shared\Application\Exception\InvalidCredentialsException;
@@ -33,9 +34,9 @@ final readonly class ApiErrorMiddleware implements MiddlewareInterface
     public function __construct(
         private ApiErrorResponseFactory $errorResponseFactory,
         private StreamFactoryInterface $streamFactory,
+        private TraceContextProviderInterface $traceContextProvider,
         private array $apiPrefixes = ['/api', '/api/'],
-    ) {
-    }
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -80,7 +81,9 @@ final readonly class ApiErrorMiddleware implements MiddlewareInterface
             if (is_array($decoded) && isset($decoded['error']) && is_array($decoded['error'])) {
                 if (!isset($decoded['request_id'])) {
                     $requestId = $request->getAttribute(RequestAttributes::REQUEST_ID);
-                    $decoded['request_id'] = is_string($requestId) ? $requestId : null;
+                    $decoded['request_id'] = is_string($requestId)
+                        ? $requestId
+                        : $this->traceContextProvider->get()->requestId();
                 }
 
                 $stream = $this->streamFactory->createStream((string) json_encode($decoded, JSON_UNESCAPED_UNICODE));

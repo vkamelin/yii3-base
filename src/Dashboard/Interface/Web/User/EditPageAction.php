@@ -17,8 +17,7 @@ final readonly class EditPageAction
         private DashboardViewRenderer $viewRenderer,
         private UserReadRepository $userReadRepository,
         private ResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function __invoke(string $id): ResponseInterface
     {
@@ -44,4 +43,3 @@ final readonly class EditPageAction
         ]);
     }
 }
-

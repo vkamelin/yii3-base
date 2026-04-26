@@ -26,8 +26,7 @@ final readonly class CreatePermissionHandler
         private PermissionRepositoryInterface $permissions,
         private ActivityLoggerInterface $activityLogger,
         private RequestAuditContext $auditContext,
-    ) {
-    }
+    ) {}
 
     public function __invoke(CreatePermissionCommand $command): PermissionView
     {

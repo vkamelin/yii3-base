@@ -6,6 +6,4 @@ namespace App\Shared\Application\Exception;
 
 use RuntimeException;
 
-final class ConflictException extends RuntimeException
-{
-}
+final class ConflictException extends RuntimeException {}

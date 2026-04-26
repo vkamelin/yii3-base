@@ -10,6 +10,8 @@ use App\Shared\Application\Audit\ActivityLogEntry;
 use App\Shared\Application\Audit\ActivityLoggerInterface;
 use App\Shared\Application\Audit\ActorContext;
 use App\Shared\Application\Audit\Action\SystemAuditAction;
+use App\Shared\Application\Tracing\TraceContextProviderInterface;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -148,6 +150,8 @@ final class SeedCommand extends Command
         private readonly ConnectionInterface $db,
         private readonly PasswordHasherInterface $passwordHasher,
         private readonly ActivityLoggerInterface $activityLogger,
+        private readonly LoggerInterface $logger,
+        private readonly TraceContextProviderInterface $traceContextProvider,
     ) {
         parent::__construct();
     }
@@ -166,6 +170,14 @@ final class SeedCommand extends Command
     {
         $resetAdminPassword = (bool) $input->getOption('reset-admin-password');
         $now = $this->now();
+        $traceContext = $this->traceContextProvider->get();
+
+        $this->logger->info('console.seed.started', [
+            'source' => 'console',
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'reset_admin_password' => $resetAdminPassword,
+        ]);
 
         try {
             $this->db->transaction(function (ConnectionInterface $db) use ($now, $resetAdminPassword): void {
@@ -177,6 +189,12 @@ final class SeedCommand extends Command
                 $this->attachUserRole($db, $adminUserId, $roleIds['admin'], $now);
             });
         } catch (\Throwable $e) {
+            $this->logger->error('console.seed.failed', [
+                'source' => 'console',
+                'request_id' => $traceContext->requestId(),
+                'correlation_id' => $traceContext->correlationId(),
+                'error' => $e->getMessage(),
+            ]);
             $output->writeln(sprintf('<error>Seed failed: %s</error>', $e->getMessage()));
             return ExitCode::UNSPECIFIED_ERROR;
         }
@@ -194,6 +212,13 @@ final class SeedCommand extends Command
         $output->writeln(
             '<comment>WARNING: Default admin password is for development only. Change it immediately.</comment>',
         );
+
+        $this->logger->info('console.seed.completed', [
+            'source' => 'console',
+            'request_id' => $traceContext->requestId(),
+            'correlation_id' => $traceContext->correlationId(),
+            'reset_admin_password' => $resetAdminPassword,
+        ]);
 
         return ExitCode::OK;
     }

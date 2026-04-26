@@ -8,6 +8,5 @@ final readonly class LogoutCommand
 {
     public function __construct(
         public ?string $token = null,
-    ) {
-    }
+    ) {}
 }

@@ -12,6 +12,7 @@ final readonly class ReservedJob
         public JobInterface $job,
         public int $attempt,
         public int $maxAttempts,
+        /** @var array<string,mixed> */
+        public array $metadata = [],
     ) {}
 }
-

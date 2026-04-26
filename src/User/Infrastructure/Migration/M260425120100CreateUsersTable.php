@@ -21,7 +21,7 @@ final class M260425120100CreateUsersTable implements RevertibleMigrationInterfac
                 `created_at` DATETIME(6) NOT NULL,
                 `updated_at` DATETIME(6) NOT NULL,
                 `deleted_at` DATETIME(6) NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
         );
 
         $b->execute("CREATE UNIQUE INDEX `uq_users_email_normalized` ON `users` (`email_normalized`)");
