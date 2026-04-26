@@ -26,10 +26,9 @@ $isActive = static function (string $prefix) use ($routeName): bool {
 };
 
 $menu = [
-    ['label' => 'Home', 'url' => '/dashboard', 'prefix' => 'dashboard.home'],
-    ['label' => 'Users', 'url' => '/dashboard/users', 'prefix' => 'dashboard.users'],
-    ['label' => 'Roles', 'url' => '/dashboard/roles', 'prefix' => 'dashboard.roles'],
-    ['label' => 'Permissions', 'url' => '/dashboard/permissions', 'prefix' => 'dashboard.permissions'],
+    ['label' => 'Пользователи', 'url' => '/dashboard/users', 'prefix' => 'dashboard.users', 'icon' => 'users'],
+    ['label' => 'Роли', 'url' => '/dashboard/roles', 'prefix' => 'dashboard.roles', 'icon' => 'user-shield'],
+    ['label' => 'Разрешения', 'url' => '/dashboard/permissions', 'prefix' => 'dashboard.permissions', 'icon' => 'user-key'],
 ];
 
 $assetManager->register(DashboardAsset::class);
@@ -58,12 +57,22 @@ $this->beginPage();
 <div class="page">
     <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
         <div class="container-fluid">
-            <h1 class="navbar-brand navbar-brand-autodark"><?= Html::encode($applicationParams->name) ?></h1>
-            <div class="collapse navbar-collapse show">
+            <div class="d-flex justify-content-start align-items-center w-100">
+                <a href="#" class="p-2 m-0 h1 text-white d-block d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
+                    <i class="ti ti-menu-2"></i>
+                </a>
+                <a href="/dashboard" class="navbar-brand navbar-brand-autodark h1 align-self-center ms-2">
+                    <?= Html::encode($applicationParams->name) ?>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse d-none d-lg-flex">
                 <ul class="navbar-nav pt-lg-3">
                     <?php foreach ($menu as $item): ?>
                         <li class="nav-item <?= $isActive($item['prefix']) ? 'active' : '' ?>">
                             <a class="nav-link" href="<?= Html::encode($item['url']) ?>">
+                                <?php if (!empty($item['icon'])): ?>
+                                    <span class="nav-link-icon"><i class="ti ti-<?= $item['icon'] ?>"></i></span>
+                                <?php endif; ?>
                                 <span class="nav-link-title"><?= Html::encode($item['label']) ?></span>
                             </a>
                         </li>
@@ -94,6 +103,31 @@ $this->beginPage();
         </div>
     </div>
 </div>
+
+<div class="offcanvas offcanvas-start offcanvas-narrow" tabindex="-1" id="offcanvasSidebar" aria-modal="true" role="dialog" data-bs-theme="dark">
+  <div class="offcanvas-header">
+    <h2 class="offcanvas-title"><?= Html::encode($applicationParams->name) ?></h2>
+    <button type="button" class="btn-close h3" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <!-- body -->
+     <div class="collapse navbar-collapse show">
+                <ul class="navbar-nav pt-lg-3">
+                    <?php foreach ($menu as $item): ?>
+                        <li class="nav-item <?= $isActive($item['prefix']) ? 'active' : '' ?>">
+                            <a class="nav-link" href="<?= Html::encode($item['url']) ?>">
+                                <?php if (!empty($item['icon'])): ?>
+                                    <span class="nav-link-icon"><i class="ti ti-<?= $item['icon'] ?>"></i></span>
+                                <?php endif; ?>
+                                <span class="nav-link-title"><?= Html::encode($item['label']) ?></span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+  </div>
+</div>
+
 <?php $this->endBody() ?>
 </body>
 </html>
