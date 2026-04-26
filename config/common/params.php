@@ -61,6 +61,15 @@ return [
                 '/dashboard' => 'dashboard.view',
             ],
             'apiPermissionsByPrefix' => [],
+            'apiPermissionsByMethodAndPrefix' => [
+                'GET /api/v1/users' => 'users.view',
+                'POST /api/v1/users' => 'users.manage',
+                'PATCH /api/v1/users' => 'users.manage',
+                'DELETE /api/v1/users' => 'users.manage',
+                'GET /api/v1/roles' => 'roles.view',
+                'POST /api/v1/roles' => 'roles.manage',
+                'GET /api/v1/permissions' => 'permissions.view',
+            ],
         ],
     ],
 

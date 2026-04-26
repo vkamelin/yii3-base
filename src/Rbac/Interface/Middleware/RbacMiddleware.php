@@ -18,6 +18,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Status;
 
 use function is_string;
+use function strtoupper;
+use function trim;
 use function str_starts_with;
 
 final readonly class RbacMiddleware implements MiddlewareInterface
@@ -26,6 +28,7 @@ final readonly class RbacMiddleware implements MiddlewareInterface
      * @param list<string> $apiPrefixes
      * @param array<string, string> $webPermissionsByPrefix
      * @param array<string, string> $apiPermissionsByPrefix
+     * @param array<string, string> $apiPermissionsByMethodAndPrefix
      */
     public function __construct(
         private AccessCheckerInterface $accessChecker,
@@ -35,12 +38,17 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         private array $apiPrefixes = ['/api', '/api/'],
         private array $webPermissionsByPrefix = ['/dashboard' => 'dashboard.view'],
         private array $apiPermissionsByPrefix = [],
+        private array $apiPermissionsByMethodAndPrefix = [],
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $isApi = $this->isApiRequest($request);
-        $permission = $this->requiredPermission($request->getUri()->getPath(), $isApi);
+        $permission = $this->requiredPermission(
+            $request->getMethod(),
+            $request->getUri()->getPath(),
+            $isApi,
+        );
 
         if ($permission === null) {
             return $handler->handle($request);
@@ -49,7 +57,7 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         $userId = $request->getAttribute(RequestAttributes::USER_ID);
         if (!is_string($userId) || $userId === '') {
             if ($isApi) {
-                return $this->apiErrorResponder->error($request, 401, 'UNAUTHORIZED', 'Unauthorized.');
+                return $this->apiErrorResponder->error($request, 401, 'UNAUTHENTICATED', 'Unauthenticated.');
             }
 
             return $this->redirectResponseFactory->to('/login');
@@ -59,7 +67,7 @@ final readonly class RbacMiddleware implements MiddlewareInterface
             $user = UserId::fromString($userId);
         } catch (InvalidArgumentException) {
             if ($isApi) {
-                return $this->apiErrorResponder->error($request, 401, 'UNAUTHORIZED', 'Unauthorized.');
+                return $this->apiErrorResponder->error($request, 401, 'UNAUTHENTICATED', 'Unauthenticated.');
             }
 
             return $this->responseFactory->createResponse(Status::UNAUTHORIZED);
@@ -88,8 +96,29 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         return false;
     }
 
-    private function requiredPermission(string $path, bool $isApi): ?string
+    private function requiredPermission(string $method, string $path, bool $isApi): ?string
     {
+        if ($isApi) {
+            $normalizedMethod = strtoupper($method);
+            foreach ($this->apiPermissionsByMethodAndPrefix as $rule => $permission) {
+                $delimiterPos = strpos($rule, ' ');
+                if ($delimiterPos === false) {
+                    continue;
+                }
+
+                $ruleMethod = strtoupper(trim(substr($rule, 0, $delimiterPos)));
+                $rulePathPrefix = trim(substr($rule, $delimiterPos + 1));
+
+                if ($ruleMethod !== $normalizedMethod || $rulePathPrefix === '') {
+                    continue;
+                }
+
+                if (str_starts_with($path, $rulePathPrefix)) {
+                    return $permission;
+                }
+            }
+        }
+
         $rules = $isApi ? $this->apiPermissionsByPrefix : $this->webPermissionsByPrefix;
         foreach ($rules as $pathPrefix => $permission) {
             if (str_starts_with($path, $pathPrefix)) {

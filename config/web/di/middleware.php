@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 use App\Shared\Interface\Http\Middleware\CorsMiddleware;
 use App\Shared\Interface\Http\Middleware\AccessLogMiddleware;
-use App\Shared\Interface\Http\Middleware\ApiErrorMiddleware;
+use App\Api\Interface\Http\Middleware\ApiErrorMiddleware;
 use App\Shared\Interface\Http\Middleware\AuthenticationMiddleware;
-use App\Shared\Interface\Http\Middleware\JsonBodyParserMiddleware;
+use App\Api\Interface\Http\Middleware\JsonResponseMiddleware;
 use App\Shared\Interface\Http\Middleware\RateLimitMiddleware;
 use App\Shared\Interface\Http\Middleware\RequestIdMiddleware;
 use App\Shared\Interface\Http\Middleware\SelectiveCsrfTokenMiddleware;
 use App\Shared\Interface\Http\Middleware\WebErrorMiddleware;
+use App\Api\Interface\Http\Middleware\BearerTokenMiddleware;
 use App\Rbac\Interface\Middleware\RbacMiddleware;
 use Yiisoft\Definitions\Reference;
 use Yiisoft\Input\Http\HydratorAttributeParametersResolver;
@@ -31,11 +32,12 @@ return [
                 WebErrorMiddleware::class,
                 RequestIdMiddleware::class,
                 AccessLogMiddleware::class,
-                JsonBodyParserMiddleware::class,
+                JsonResponseMiddleware::class,
                 SessionMiddleware::class,
                 SelectiveCsrfTokenMiddleware::class,
                 RateLimitMiddleware::class,
                 AuthenticationMiddleware::class,
+                BearerTokenMiddleware::class,
                 RbacMiddleware::class,
                 RequestCatcherMiddleware::class,
                 Router::class,
@@ -57,8 +59,8 @@ return [
         ],
     ],
 
-    JsonBodyParserMiddleware::class => [
-        'class' => JsonBodyParserMiddleware::class,
+    JsonResponseMiddleware::class => [
+        'class' => JsonResponseMiddleware::class,
         '__construct()' => [
             'apiPrefixes' => $params['middleware']['api']['prefixes'] ?? ['/api', '/api/'],
         ],
@@ -77,9 +79,17 @@ return [
     AuthenticationMiddleware::class => [
         'class' => AuthenticationMiddleware::class,
         '__construct()' => [
-            'apiPrefixes' => $params['middleware']['api']['prefixes'] ?? ['/api', '/api/'],
-            'apiPublicPaths' => $params['middleware']['api']['publicPaths'] ?? ['/api/v1/auth/login'],
+            'apiPrefixes' => [],
+            'apiPublicPaths' => [],
             'webProtectedPrefixes' => $params['middleware']['web']['protectedPrefixes'] ?? ['/dashboard'],
+        ],
+    ],
+
+    BearerTokenMiddleware::class => [
+        'class' => BearerTokenMiddleware::class,
+        '__construct()' => [
+            'apiPrefixes' => $params['middleware']['api']['prefixes'] ?? ['/api', '/api/'],
+            'publicPaths' => $params['middleware']['api']['publicPaths'] ?? ['/api/v1/auth/login'],
         ],
     ],
 
@@ -89,6 +99,7 @@ return [
             'apiPrefixes' => $params['middleware']['api']['prefixes'] ?? ['/api', '/api/'],
             'webPermissionsByPrefix' => $params['middleware']['rbac']['webPermissionsByPrefix'] ?? ['/dashboard' => 'dashboard.view'],
             'apiPermissionsByPrefix' => $params['middleware']['rbac']['apiPermissionsByPrefix'] ?? [],
+            'apiPermissionsByMethodAndPrefix' => $params['middleware']['rbac']['apiPermissionsByMethodAndPrefix'] ?? [],
         ],
     ],
 

@@ -10,6 +10,7 @@ final class RequestAttributes
     public const USER_ID = 'authenticated_user_id';
     public const AUTH_CHANNEL = 'auth_channel';
     public const API_TOKEN = 'api_token';
+    public const AUTH_RESULT = 'auth_result';
 
     private function __construct() {}
 }
