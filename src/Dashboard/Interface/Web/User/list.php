@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Dashboard\Infrastructure\Asset\DatatablesAsset;
 use App\User\Application\DTO\UserListItem;
+use Yiisoft\Assets\AssetManager;
 use Yiisoft\Html\Html;
 use Yiisoft\View\WebView;
 
@@ -14,9 +16,12 @@ use Yiisoft\View\WebView;
  * @var int $perPage
  * @var string $search
  * @var string $status
+ * @var AssetManager $assetManager
  */
 
 $this->setTitle('Users');
+
+$assetManager->register(DatatablesAsset::class);
 
 $headers = ['Email', 'Name', 'Status', 'Created', 'Actions'];
 $rows = [];
