@@ -8,6 +8,7 @@ use Yiisoft\Assets\AssetManager;
 use Yiisoft\Definitions\Reference;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlGeneratorInterface;
+use Yiisoft\Session\Flash\FlashInterface;
 use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 
 return [
@@ -55,10 +56,15 @@ return [
         ],
         'web' => [
             'protectedPrefixes' => ['/dashboard'],
+            'publicPaths' => ['/login', '/dashboard/login'],
         ],
         'rbac' => [
+            'webPublicPaths' => ['/login', '/dashboard/login'],
             'webPermissionsByPrefix' => [
-                '/dashboard' => 'dashboard.view',
+                '/dashboard/users' => 'users.manage',
+                '/dashboard/roles' => 'roles.manage',
+                '/dashboard/permissions' => 'permissions.manage',
+                '/dashboard' => 'dashboard.access',
             ],
             'apiPermissionsByPrefix' => [],
             'apiPermissionsByMethodAndPrefix' => [
@@ -95,6 +101,7 @@ return [
             'aliases' => Reference::to(Aliases::class),
             'urlGenerator' => Reference::to(UrlGeneratorInterface::class),
             'currentRoute' => Reference::to(CurrentRoute::class),
+            'flash' => Reference::to(FlashInterface::class),
         ],
     ],
 

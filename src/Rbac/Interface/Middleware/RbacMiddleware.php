@@ -26,6 +26,7 @@ final readonly class RbacMiddleware implements MiddlewareInterface
 {
     /**
      * @param list<string> $apiPrefixes
+     * @param list<string> $webPublicPaths
      * @param array<string, string> $webPermissionsByPrefix
      * @param array<string, string> $apiPermissionsByPrefix
      * @param array<string, string> $apiPermissionsByMethodAndPrefix
@@ -36,7 +37,8 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         private RedirectResponseFactory $redirectResponseFactory,
         private ApiErrorResponder $apiErrorResponder,
         private array $apiPrefixes = ['/api', '/api/'],
-        private array $webPermissionsByPrefix = ['/dashboard' => 'dashboard.view'],
+        private array $webPublicPaths = ['/login', '/dashboard/login'],
+        private array $webPermissionsByPrefix = ['/dashboard' => 'dashboard.access'],
         private array $apiPermissionsByPrefix = [],
         private array $apiPermissionsByMethodAndPrefix = [],
     ) {}
@@ -44,6 +46,10 @@ final readonly class RbacMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $isApi = $this->isApiRequest($request);
+        if (!$isApi && $this->isPublicWebPath($request->getUri()->getPath())) {
+            return $handler->handle($request);
+        }
+
         $permission = $this->requiredPermission(
             $request->getMethod(),
             $request->getUri()->getPath(),
@@ -60,7 +66,7 @@ final readonly class RbacMiddleware implements MiddlewareInterface
                 return $this->apiErrorResponder->error($request, 401, 'UNAUTHENTICATED', 'Unauthenticated.');
             }
 
-            return $this->redirectResponseFactory->to('/login');
+            return $this->redirectResponseFactory->to($this->loginPathForWebPath($request->getUri()->getPath()));
         }
 
         try {
@@ -94,6 +100,26 @@ final readonly class RbacMiddleware implements MiddlewareInterface
         }
 
         return false;
+    }
+
+    private function isPublicWebPath(string $path): bool
+    {
+        foreach ($this->webPublicPaths as $publicPath) {
+            if (trim($publicPath) === $path) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function loginPathForWebPath(string $path): string
+    {
+        if (str_starts_with($path, '/dashboard')) {
+            return '/dashboard/login';
+        }
+
+        return '/login';
     }
 
     private function requiredPermission(string $method, string $path, bool $isApi): ?string

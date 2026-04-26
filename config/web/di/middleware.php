@@ -82,6 +82,7 @@ return [
             'apiPrefixes' => [],
             'apiPublicPaths' => [],
             'webProtectedPrefixes' => $params['middleware']['web']['protectedPrefixes'] ?? ['/dashboard'],
+            'webPublicPaths' => $params['middleware']['web']['publicPaths'] ?? ['/login', '/dashboard/login'],
         ],
     ],
 
@@ -97,7 +98,8 @@ return [
         'class' => RbacMiddleware::class,
         '__construct()' => [
             'apiPrefixes' => $params['middleware']['api']['prefixes'] ?? ['/api', '/api/'],
-            'webPermissionsByPrefix' => $params['middleware']['rbac']['webPermissionsByPrefix'] ?? ['/dashboard' => 'dashboard.view'],
+            'webPublicPaths' => $params['middleware']['rbac']['webPublicPaths'] ?? ['/login', '/dashboard/login'],
+            'webPermissionsByPrefix' => $params['middleware']['rbac']['webPermissionsByPrefix'] ?? ['/dashboard' => 'dashboard.access'],
             'apiPermissionsByPrefix' => $params['middleware']['rbac']['apiPermissionsByPrefix'] ?? [],
             'apiPermissionsByMethodAndPrefix' => $params['middleware']['rbac']['apiPermissionsByMethodAndPrefix'] ?? [],
         ],

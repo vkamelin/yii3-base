@@ -22,6 +22,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use function in_array;
 use function is_string;
 use function str_starts_with;
+use function trim;
 
 final readonly class AuthenticationMiddleware implements MiddlewareInterface
 {
@@ -29,6 +30,7 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
      * @param list<string> $apiPrefixes
      * @param list<string> $apiPublicPaths
      * @param list<string> $webProtectedPrefixes
+     * @param list<string> $webPublicPaths
      */
     public function __construct(
         private AuthSessionInterface $authSession,
@@ -39,6 +41,7 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
         private array $apiPrefixes = ['/api', '/api/'],
         private array $apiPublicPaths = ['/api/v1/auth/login'],
         private array $webProtectedPrefixes = ['/dashboard'],
+        private array $webPublicPaths = ['/login', '/dashboard/login'],
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -82,8 +85,8 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
         $path = $request->getUri()->getPath();
         $sessionUserId = $this->authSession->userId();
 
-        if ($this->isProtectedWebPath($path) && $sessionUserId === null) {
-            return $this->redirectResponseFactory->to('/login');
+        if ($this->isProtectedWebPath($path) && !$this->isPublicWebPath($path) && $sessionUserId === null) {
+            return $this->redirectResponseFactory->to($this->loginPathForWebPath($path));
         }
 
         if (is_string($sessionUserId) && $sessionUserId !== '') {
@@ -116,5 +119,25 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         return false;
+    }
+
+    private function isPublicWebPath(string $path): bool
+    {
+        foreach ($this->webPublicPaths as $publicPath) {
+            if (trim($publicPath) === $path) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function loginPathForWebPath(string $path): string
+    {
+        if (str_starts_with($path, '/dashboard')) {
+            return '/dashboard/login';
+        }
+
+        return '/login';
     }
 }

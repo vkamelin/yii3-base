@@ -7,6 +7,7 @@ namespace App\Rbac\Infrastructure\Security;
 use App\Rbac\Domain\Service\AccessCheckerInterface;
 use App\User\Domain\ValueObject\UserId;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Expression\Expression;
 
 use function count;
 use function in_array;
@@ -31,7 +32,7 @@ final readonly class MySqlAccessChecker implements AccessCheckerInterface
         }
 
         $row = $this->connection->createQuery()
-            ->select(['1'])
+            ->select(new Expression('1'))
             ->from(['ur' => self::USER_ROLE_TABLE])
             ->innerJoin(['rp' => self::ROLE_PERMISSION_TABLE], 'rp.role_id = ur.role_id')
             ->innerJoin(['p' => self::PERMISSION_TABLE], 'p.id = rp.permission_id')
@@ -53,7 +54,7 @@ final readonly class MySqlAccessChecker implements AccessCheckerInterface
         }
 
         $row = $this->connection->createQuery()
-            ->select(['1'])
+            ->select(new Expression('1'))
             ->from(['ur' => self::USER_ROLE_TABLE])
             ->innerJoin(['rp' => self::ROLE_PERMISSION_TABLE], 'rp.role_id = ur.role_id')
             ->innerJoin(['p' => self::PERMISSION_TABLE], 'p.id = rp.permission_id')
