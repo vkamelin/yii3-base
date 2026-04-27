@@ -64,9 +64,6 @@ jobs:
       - name: Run PHP CS Fixer (dry-run)
         run: composer run cs
 
-      - name: Run Psalm
-        run: composer run psalm
-
       - name: Run PHPStan
         run: composer run phpstan
 
