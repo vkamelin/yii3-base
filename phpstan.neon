@@ -1,0 +1,8 @@
+parameters:
+    level: 5
+    paths:
+        - src/
+    excludePaths:
+        - src/*/Tests/*
+    phpVersion: 840000
+    tmpDir: runtime/phpstan
