@@ -55,8 +55,8 @@ final readonly class CreateRoleAction
         }
 
         $role = $this->createRoleHandler->handle(new CreateRoleCommand(
-            code: trim($code),
-            name: trim($name),
+            code: trim($code ?? ''),
+            name: trim($name ?? ''),
             description: $description !== null ? trim($description) : null,
             isSystem: $isSystem,
         ));
