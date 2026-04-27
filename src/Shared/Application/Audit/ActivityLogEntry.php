@@ -128,15 +128,15 @@ final readonly class ActivityLogEntry
     ): self {
         return new self(
             id: Uuid::uuid7()->toString(),
-            actorUserId: $context?->userId ?? $actorUserId,
-            actorType: $context?->actorType ?? $actorType,
+            actorUserId: $context->userId ?? $actorUserId,
+            actorType: $context->actorType ?? $actorType,
             action: $action,
             entityType: $entityType,
             entityId: $entityId,
             ip: $context?->ip,
             userAgent: $context?->userAgent,
             requestId: $context?->requestId,
-            source: $context?->source ?? ActorContext::SOURCE_SYSTEM,
+            source: $context->source ?? ActorContext::SOURCE_SYSTEM,
             payload: $payload,
             createdAt: new DateTimeImmutable(),
         );

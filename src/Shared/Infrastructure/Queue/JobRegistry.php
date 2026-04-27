@@ -24,10 +24,7 @@ final class JobRegistry
     public function __construct(array $definitions = [])
     {
         foreach ($definitions as $type => $definition) {
-            if (!is_array($definition) || !isset($definition['job'], $definition['handler'])) {
-                throw new InvalidJobPayloadException(sprintf('Invalid queue job registry definition for type "%s".', $type));
-            }
-
+            /** @var array{job:class-string<JobInterface>,handler:class-string<JobHandlerInterface>} $definition */
             $this->register($type, $definition['job'], $definition['handler']);
         }
     }

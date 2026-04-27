@@ -58,5 +58,3 @@ require __DIR__ . '/../Layout/Partial/table.php';
 $path = '/dashboard/permissions';
 $query = ['search' => $search, 'group_code' => $groupCode, 'is_system' => $isSystem, 'per_page' => $perPage];
 require __DIR__ . '/../Layout/Partial/pagination.php';
-?>
-

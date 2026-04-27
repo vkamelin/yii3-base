@@ -124,13 +124,11 @@ final readonly class RateLimitMiddleware implements MiddlewareInterface
         $forwardedFor = $request->getHeaderLine('X-Forwarded-For');
         if ($forwardedFor !== '') {
             $firstIp = strtok($forwardedFor, ',');
-            if ($firstIp !== false) {
-                return $firstIp;
-            }
+            return $firstIp ? (string) $firstIp : 'anonymous';
         }
 
         $remoteAddress = $request->getServerParams()['REMOTE_ADDR'] ?? null;
-        if (is_string($remoteAddress) && $remoteAddress !== '') {
+        if ($remoteAddress !== null && $remoteAddress !== '') {
             return $remoteAddress;
         }
 

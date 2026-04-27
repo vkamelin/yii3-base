@@ -21,5 +21,3 @@ $this->setTitle('Create User');
 $action = '/dashboard/users/create';
 $submitLabel = 'Create';
 require __DIR__ . '/form.php';
-?>
-

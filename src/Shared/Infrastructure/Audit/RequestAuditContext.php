@@ -110,9 +110,7 @@ final readonly class RequestAuditContext
         $forwardedFor = $request->getHeaderLine('X-Forwarded-For');
         if ($forwardedFor !== '') {
             $firstIp = strtok($forwardedFor, ',');
-            if (is_string($firstIp)) {
-                return $this->normalizeNullableString($firstIp);
-            }
+            return $this->normalizeNullableString($firstIp);
         }
 
         $serverParams = $request->getServerParams();

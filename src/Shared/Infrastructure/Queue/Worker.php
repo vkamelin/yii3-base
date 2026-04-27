@@ -100,8 +100,8 @@ final class Worker
                 context: ActorContext::system(ActorContext::SOURCE_QUEUE),
             ));
 
+            $jobStartedAt = microtime(true);
             try {
-                $jobStartedAt = microtime(true);
                 $handler = $this->registry->resolveHandler($reservedJob->job, $this->container);
                 $handler->handle($reservedJob->job);
                 $queue->markDone($reservedJob);

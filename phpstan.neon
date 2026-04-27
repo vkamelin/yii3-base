@@ -4,5 +4,4 @@ parameters:
         - src/
     excludePaths:
         - src/*/Tests/*
-    phpVersion: 840000
     tmpDir: runtime/phpstan

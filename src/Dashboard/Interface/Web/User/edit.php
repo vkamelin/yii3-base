@@ -22,5 +22,3 @@ $this->setTitle('Edit User');
 $action = '/dashboard/users/' . rawurlencode($userId) . '/edit';
 $submitLabel = 'Save';
 require __DIR__ . '/form.php';
-?>
-

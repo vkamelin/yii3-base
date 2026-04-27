@@ -73,5 +73,3 @@ $title = 'Удаление пользователя';
 $message = 'Delete action is not connected yet.';
 $confirmLabel = 'Удалить';
 require __DIR__ . '/../Layout/Partial/confirm-delete-modal.php';
-?>
-
