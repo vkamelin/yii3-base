@@ -33,6 +33,10 @@ if (PHP_SAPI === 'cli-server') {
 
     /** @var string $path */
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if ($path === false || $path === null) {
+        return false;
+    }
+
     if (is_file(__DIR__ . $path)) {
         return false;
     }
