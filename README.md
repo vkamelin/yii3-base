@@ -230,6 +230,37 @@ make rector
 make composer-dependency-analyser
 ```
 
+## API Документация
+
+Полная OpenAPI/Swagger спецификация доступна в [docs/api/](docs/api/).
+
+### Быстрый доступ
+
+- **Swagger UI**: Откройте `docs/api/index.html` в браузере
+- **OpenAPI Spec**: [docs/api/openapi.yaml](docs/api/openapi.yaml)
+- **API README**: [docs/api/README.md](docs/api/README.md)
+
+### Запуск Swagger UI
+
+```bash
+# Через PHP встроенный сервер
+cd docs/api
+php -S localhost:8080
+
+# Затем откройте: http://localhost:8080
+```
+
+### API Endpoints
+
+| Module   | Endpoints                          |
+|----------|------------------------------------|
+| Auth     | `/api/v1/auth/login`, `/logout`, `/me` |
+| Users    | `/api/v1/users` (CRUD)             |
+| Roles    | `/api/v1/roles`                    |
+| Permissions | `/api/v1/permissions`           |
+
+Подробнее см. [docs/api/README.md](docs/api/README.md).
+
 ## Переменные окружения
 
 Основные переменные для настройки в `.env`:
