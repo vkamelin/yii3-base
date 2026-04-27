@@ -77,6 +77,7 @@ final readonly class ApiErrorMiddleware implements MiddlewareInterface
             }
 
             $raw = $body->getContents();
+            /** @var array<array-key, mixed>|null $decoded */
             $decoded = $raw !== '' ? json_decode($raw, true) : null;
 
             if (is_array($decoded) && isset($decoded['error']) && is_array($decoded['error'])) {
