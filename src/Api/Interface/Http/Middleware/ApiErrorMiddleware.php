@@ -38,6 +38,7 @@ final readonly class ApiErrorMiddleware implements MiddlewareInterface
         private array $apiPrefixes = ['/api', '/api/'],
     ) {}
 
+    #[\Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (!$this->isApiRequest($request)) {
