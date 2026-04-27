@@ -16,3 +16,15 @@ services:
       - ../runtime:/app/runtime
       - logs_data:/app/runtime/logs
     tty: true
+
+  web:
+    ports:
+      - "8080:80"
+
+  mysql:
+    ports:
+      - "3306:3306"
+
+  redis:
+    ports:
+      - "6379:6379"
