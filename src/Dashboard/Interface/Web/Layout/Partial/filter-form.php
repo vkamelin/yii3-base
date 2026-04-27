@@ -24,7 +24,7 @@ use Yiisoft\Html\Html;
                     <label class="form-label"><?= Html::encode($field['label']) ?></label>
                     <?php if (($field['type'] ?? 'text') === 'select'): ?>
                         <select class="form-select" name="<?= Html::encode($field['name']) ?>">
-                            <option value="">All</option>
+                            <option value="">Все</option>
                             <?php foreach (($field['options'] ?? []) as $optionValue => $optionLabel): ?>
                                 <option
                                     value="<?= Html::encode($optionValue) ?>"
@@ -47,8 +47,8 @@ use Yiisoft\Html\Html;
             <?php endforeach; ?>
         </div>
         <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Filter</button>
-            <a href="<?= Html::encode($action) ?>" class="btn btn-outline-secondary">Reset</a>
+            <button type="submit" class="btn">Фильтр</button>
+            <a href="<?= Html::encode($action) ?>" class="btn">Сбросить</a>
         </div>
     </div>
 </form>

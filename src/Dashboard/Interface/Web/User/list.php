@@ -18,11 +18,11 @@ use Yiisoft\View\WebView;
  * @var AssetManager $assetManager
  */
 
-$this->setTitle('Users');
+$this->setTitle('Пользователи');
 
 $assetManager->register(DatatablesAsset::class);
 
-$headers = ['Email', 'Name', 'Status', 'Created', 'Actions'];
+$headers = ['Email', 'Имя', 'Статус', 'Создан', 'Действия'];
 $rows = [];
 foreach ($users as $user) {
     $rows[] = [
@@ -39,22 +39,22 @@ foreach ($users as $user) {
 }
 ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="page-title">Users</h2>
-    <a class="btn btn-primary" href="/dashboard/users/create">Create User</a>
+    <h2 class="page-title">Пользователи</h2>
+    <a class="btn" href="/dashboard/users/create">Добавить пользователя</a>
 </div>
 
 <?php
 $action = '/dashboard/users';
 $fields = [
-    ['name' => 'search', 'label' => 'Search', 'value' => $search, 'placeholder' => 'email or name'],
+    ['name' => 'search', 'label' => 'Поиск', 'value' => $search, 'placeholder' => 'email или имя'],
     [
         'name' => 'status',
-        'label' => 'Status',
+        'label' => 'Статус',
         'value' => $status,
         'type' => 'select',
-        'options' => ['active' => 'Active', 'blocked' => 'Blocked', 'pending' => 'Pending'],
+        'options' => ['active' => 'Активен', 'blocked' => 'Заблокирован', 'pending' => 'Ожидает'],
     ],
-    ['name' => 'per_page', 'label' => 'Per page', 'value' => (string) $perPage, 'type' => 'select', 'options' => [
+    ['name' => 'per_page', 'label' => 'На страницу', 'value' => (string) $perPage, 'type' => 'select', 'options' => [
         '10' => '10',
         '20' => '20',
         '50' => '50',
@@ -69,9 +69,9 @@ $query = ['search' => $search, 'status' => $status, 'per_page' => $perPage];
 require __DIR__ . '/../Layout/Partial/pagination.php';
 
 $modalId = 'confirmDelete';
-$title = 'Delete user';
+$title = 'Удаление пользователя';
 $message = 'Delete action is not connected yet.';
-$confirmLabel = 'Delete';
+$confirmLabel = 'Удалить';
 require __DIR__ . '/../Layout/Partial/confirm-delete-modal.php';
 ?>
 
