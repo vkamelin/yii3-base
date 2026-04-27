@@ -14,6 +14,7 @@ final class DashboardAsset extends AssetBundle
 
     public array $css = [
         'tabler.min.css',
+        'main.css',
     ];
 
     public array $js = [

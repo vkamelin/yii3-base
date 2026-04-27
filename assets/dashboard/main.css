@@ -1,0 +1,22 @@
+.dashboard-submenu-list {
+    margin: 0;
+    padding-left: 0;
+}
+.dashboard-submenu-link {
+    justify-content: flex-start;
+    text-align: left;
+    color: inherit;
+    opacity: .75;
+    text-decoration: none;
+    padding-left: 1rem;
+}
+.dashboard-submenu-link:hover,
+.dashboard-submenu-link:focus {
+    color: var(--tblr-navbar-link-hover-color);
+    opacity: 1;
+    text-decoration: none;
+}
+.dashboard-submenu-link.active {
+    color: var(--tblr-navbar-link-active-color);
+    opacity: 1;
+}
