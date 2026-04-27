@@ -1,7 +1,8 @@
 {
     "name": "vkamelin/yii3-base",
-    "type": "project",
     "description": "Modular Yii3 application skeleton for ERP, CRM, SaaS and internal tools",
+    "license": "proprietary",
+    "type": "project",
     "keywords": [
         "yii3",
         "php",
@@ -15,48 +16,17 @@
         "rbac",
         "rest-api"
     ],
-    "license": "proprietary",
-    "scripts": {
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@php ./yii serve"
-        ],
-        "test": "codecept run",
-        "migrate": "@php ./yii migrate:up",
-        "migrate:down": "@php ./yii migrate:down",
-        "test:unit": "codecept run Unit",
-        "test:functional": "codecept run Functional",
-        "cs": "php-cs-fixer fix --dry-run --diff",
-        "cs:fix": "php-cs-fixer fix",
-        "psalm": "psalm",
-        "psalm:clear-cache": "psalm --clear-cache",
-        "phpstan": "phpstan analyse --configuration phpstan.neon",
-        "phpstan:clear-cache": "phpstan clear-result-cache",
-        "phpstan:generate-baseline": "phpstan analyse",
-        "rector": "rector process --dry-run",
-        "rector:fix": "rector process",
-        "analyse": [
-            "@psalm",
-            "@phpstan",
-            "@cs",
-            "composer dependency-analyser"
-        ],
-        "analyse:fix": [
-            "@rector:fix",
-            "@cs:fix"
-        ]
-    },
     "require": {
         "php": "^8.4",
-        "ext-filter": "*",
-        "ext-pdo": "*",
-        "ext-pdo_mysql": "*",
-        "ext-json": "*",
-        "ext-mbstring": "*",
-        "ext-intl": "*",
-        "ext-openssl": "*",
         "ext-ctype": "*",
         "ext-curl": "*",
+        "ext-filter": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
         "httpsoft/http-message": "^1.1.6",
         "middlewares/http-authentication": "^2.2",
         "middlewares/uuid": "^2.1",
@@ -121,6 +91,8 @@
         "vimeo/psalm": "^6.16.1",
         "vlucas/phpdotenv": "^5.6.3"
     },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "App\\": "src/",
@@ -132,20 +104,48 @@
             "App\\Tests\\": "tests"
         }
     },
-    "extra": {
-        "config-plugin-file": "config/configuration.php"
-    },
     "config": {
-        "sort-packages": true,
-        "bump-after-update": true,
         "allow-plugins": {
             "codeception/c3": true,
             "composer/installers": true,
             "ergebnis/composer-normalize": true,
             "infection/extension-installer": true,
             "yiisoft/config": true
-        }
+        },
+        "bump-after-update": true,
+        "sort-packages": true
     },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    "extra": {
+        "config-plugin-file": "config/configuration.php"
+    },
+    "scripts": {
+        "analyse": [
+            "@psalm",
+            "@phpstan",
+            "@cs",
+            "composer dependency-analyser"
+        ],
+        "analyse:fix": [
+            "@rector:fix",
+            "@cs:fix"
+        ],
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix",
+        "migrate": "@php ./yii migrate:up",
+        "migrate:down": "@php ./yii migrate:down",
+        "phpstan": "phpstan analyse --configuration phpstan.neon",
+        "phpstan:clear-cache": "phpstan clear-result-cache",
+        "phpstan:generate-baseline": "phpstan analyse",
+        "psalm": "psalm",
+        "psalm:clear-cache": "psalm --clear-cache",
+        "rector": "rector process --dry-run",
+        "rector:fix": "rector process",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php ./yii serve"
+        ],
+        "test": "codecept run",
+        "test:functional": "codecept run Functional",
+        "test:unit": "codecept run Unit"
+    }
 }
