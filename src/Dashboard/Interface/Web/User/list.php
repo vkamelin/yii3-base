@@ -31,9 +31,9 @@ foreach ($users as $user) {
         $user->status,
         $user->createdAt,
         [
-            'html' => '<a class="btn btn-sm btn-outline-primary" href="/dashboard/users/'
+            'html' => '<div class="btn-actions justify-content-end"><a class="btn btn-action" href="/dashboard/users/'
                 . rawurlencode($user->id)
-                . '/edit">Edit</a>',
+                . '/edit"><i class="ti ti-edit"></i></a></div>',
         ],
     ];
 }

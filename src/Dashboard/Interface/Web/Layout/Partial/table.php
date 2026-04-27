@@ -8,6 +8,8 @@ use Yiisoft\Html\Html;
  * @var list<string> $headers
  * @var list<list<mixed>> $rows
  */
+
+$lastCellIdx = count($rows[0]) - 1;
 ?>
 <div class="card">
     <div class="table-responsive">
@@ -27,8 +29,8 @@ use Yiisoft\Html\Html;
             <?php else: ?>
                 <?php foreach ($rows as $row): ?>
                     <tr>
-                        <?php foreach ($row as $cell): ?>
-                            <td>
+                        <?php foreach ($row as $i => $cell): ?>
+                            <td <?php if ($i === $lastCellIdx): ?>class="text-end"<?php endif; ?>>
                                 <?php if (is_array($cell) && isset($cell['html'])): ?>
                                     <?= (string) $cell['html'] ?>
                                 <?php else: ?>
