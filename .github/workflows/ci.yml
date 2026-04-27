@@ -52,14 +52,14 @@ jobs:
           restore-keys: |
             composer-
 
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --optimize-autoloader
+
       - name: Validate composer.json
         run: composer validate --strict
 
       - name: Normalize composer.json (dry-run)
         run: composer normalize --dry-run
-
-      - name: Install dependencies
-        run: composer install --no-interaction --no-progress --optimize-autoloader
 
       - name: Run PHP CS Fixer (dry-run)
         run: composer run cs
