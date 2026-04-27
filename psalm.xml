@@ -3,9 +3,14 @@
     errorLevel="1"
     findUnusedBaselineEntry="true"
     findUnusedCode="false"
-    ensureOverrideAttribute="false"
-    strictBinaryOperands="false"
+    ensureOverrideAttribute="true"
+    strictBinaryOperands="true"
     cacheDirectory="./runtime/cache/psalm"
+    allowStringToStandInForClass="false"
+    disableVarParsing="true"
+    memoizeMethodCallResults="true"
+    hoistConstants="true"
+    resolveFromConfigFile="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
@@ -16,10 +21,223 @@
         <file name="yii" />
         <ignoreFiles>
             <directory name="vendor" />
+            <directory name="runtime" />
+            <directory name="tests" />
         </ignoreFiles>
     </projectFiles>
+
+    <plugins>
+        <!-- Плагин для строгой типизации -->
+    </plugins>
+
     <issueHandlers>
-        <MixedAssignment errorLevel="suppress" />
+        <!-- Строгая проверка типов -->
+        <MixedAssignment errorLevel="error" />
+        <MixedArgument errorLevel="error" />
+        <MixedArrayAccess errorLevel="error" />
+        <MixedArrayAssignment errorLevel="error" />
+        <MixedFunctionCall errorLevel="error" />
+        <MixedMethodCall errorLevel="error" />
+        <MixedPropertyFetch errorLevel="error" />
+        <MixedPropertyAssignment errorLevel="error" />
+        <MixedReturnStatement errorLevel="error" />
+        <MixedOperand errorLevel="error" />
+        <MixedClone errorLevel="error" />
+        <MixedNew errorLevel="error" />
+        <MixedStringOffsetAssignment errorLevel="error" />
+
+        <!-- Проверка null -->
+        <NullReference errorLevel="error" />
+        <PossiblyNullReference errorLevel="error" />
+        <PossiblyNullArrayAccess errorLevel="error" />
+        <PossiblyNullArrayAssignment errorLevel="error" />
+        <PossiblyNullFunctionCall errorLevel="error" />
+        <PossiblyNullMethodCall errorLevel="error" />
+        <PossiblyNullPropertyFetch errorLevel="error" />
+        <PossiblyNullPropertyAssignment errorLevel="error" />
+        <PossiblyNullOperand errorLevel="error" />
+
+        <!-- Проверка undefined -->
+        <UndefinedVariable errorLevel="error" />
+        <UndefinedMethod errorLevel="error" />
+        <UndefinedFunction errorLevel="error" />
+        <UndefinedClass errorLevel="error" />
+        <UndefinedInterface errorLevel="error" />
+        <UndefinedTrait errorLevel="error" />
+        <UndefinedDocblockClass errorLevel="error" />
+        <UndefinedThisPropertyAssignment errorLevel="error" />
+        <UndefinedThisPropertyFetch errorLevel="error" />
+
+        <!-- Типизация и совместимость -->
+        <TypeCoercion errorLevel="error" />
+        <TypeCoercionGivenParam errorLevel="error" />
+        <MoreSpecificReturnType errorLevel="error" />
+        <LessSpecificReturnType errorLevel="error" />
+        <MoreSpecificImplementedParamType errorLevel="error" />
+        <LessSpecificImplementedReturnType errorLevel="error" />
+        <ImplementedReturnTypeMismatch errorLevel="error" />
+        <ParamNameMismatch errorLevel="error" />
+
+        <!-- Атрибуты и переопределение -->
+        <MissingImmutableAnnotation errorLevel="error" />
+        <MissingPureAnnotation errorLevel="error" />
+        <MissingThrowsDocblock errorLevel="error" />
+        <InvalidThrow errorLevel="error" />
+
+        <!-- Возвращаемые значения -->
+        <MissingReturnType errorLevel="error" />
+        <InvalidReturnType errorLevel="error" />
+        <UnresolvableInclude errorLevel="error" />
+
+        <!-- Параметры -->
+        <MissingParamType errorLevel="error" />
+        <InvalidParamDefault errorLevel="error" />
+
+        <!-- Свойства классов -->
+        <MissingPropertyType errorLevel="error" />
+        <InvalidPropertyAssignment errorLevel="error" />
+        <InvalidPropertyFetch errorLevel="error" />
+
+        <!-- Методы -->
+        <InvalidMethodCall errorLevel="error" />
+        <InvalidScope errorLevel="error" />
+        <InvalidStaticInvocation errorLevel="error" />
+        <InvalidStringClass errorLevel="error" />
+
+        <!-- Наследование и интерфейсы -->
+        <InvalidExtendClass errorLevel="error" />
+        <InvalidInterfaceImplementation errorLevel="error" />
+        <InvalidTraitUse errorLevel="error" />
+        <MethodSignatureMismatch errorLevel="error" />
+        <MethodSignatureMustOmitReturnType errorLevel="error" />
+        <MethodSignatureMustProvideReturnType errorLevel="error" />
+
+        <!-- Исключения -->
+        <UnhandledException errorLevel="error" />
+        <RawObjectIteration errorLevel="error" />
+
+        <!-- Побочные эффекты -->
+        <ImpureByReferenceAssignment errorLevel="error" />
+        <ImpureFunctionCall errorLevel="error" />
+        <ImpureMethodCall errorLevel="error" />
+        <ImpurePropertyFetch errorLevel="error" />
+        <ImpurePropertyAssignment errorLevel="error" />
+        <ImpureStaticProperty errorLevel="error" />
+        <ImpureStaticVariable errorLevel="error" />
+
+        <!-- Другие важные проверки -->
+        <RedundantCondition errorLevel="error" />
+        <RedundantCast errorLevel="error" />
+        <RedundantFunctionCall errorLevel="error" />
+        <RedundantCastGivenDocblockType errorLevel="error" />
+        <DocblockTypeContradiction errorLevel="error" />
+        <TypeDoesNotContainType errorLevel="error" />
+        <TypeDoesNotContainNull errorLevel="error" />
+        <FalseOperand errorLevel="error" />
+        <NullOperand errorLevel="error" />
+        <StringIncrement errorLevel="error" />
+        <InvalidArrayOffset errorLevel="error" />
+        <InvalidArrayAccess errorLevel="error" />
+        <InvalidCast errorLevel="error" />
+        <InvalidClone errorLevel="error" />
+        <InvalidDocblock errorLevel="error" />
+        <InvalidEnumBackingType errorLevel="error" />
+        <InvalidEnumCaseValue errorLevel="error" />
+        <InvalidGlobal errorLevel="error" />
+        <InvalidIterator errorLevel="error" />
+        <InvalidNamedArgument errorLevel="error" />
+        <InvalidNullableReturnType errorLevel="error" />
+        <InvalidPassByReference errorLevel="error" />
+        <InvalidPropertyAssignmentValue errorLevel="error" />
+        <InvalidReturnStatement errorLevel="error" />
+        <InvalidScalarArgument errorLevel="error" />
+        <InvalidTemplateParam errorLevel="error" />
+        <InvalidThrow errorLevel="error" />
+        <InvalidToString errorLevel="error" />
+        <MissingClosureParamType errorLevel="error" />
+        <MissingClosureReturnType errorLevel="error" />
+        <MissingConstructor errorLevel="error" />
+        <MissingDependency errorLevel="error" />
+        <MissingFile errorLevel="error" />
+        <MissingImmutableAnnotation errorLevel="error" />
+        <MissingTemplateParam errorLevel="error" />
+        <MissingThrowsDocblock errorLevel="error" />
+        <MismatchingDocblockParamType errorLevel="error" />
+        <MismatchingDocblockReturnType errorLevel="error" />
+        <MutableDependency errorLevel="error" />
+        <NoInterfaceProperties errorLevel="error" />
+        <NoValue errorLevel="error" />
+        <NonStaticSelfCall errorLevel="error" />
+        <NullFunctionCall errorLevel="error" />
+        <NullIterator errorLevel="error" />
+        <NullPropertyAssignment errorLevel="error" />
+        <NullPropertyFetch errorLevel="error" />
+        <OverriddenFinalConstant errorLevel="error" />
+        <OverriddenMethodAccess errorLevel="error" />
+        <OverriddenPropertyAccess errorLevel="error" />
+        <ParentNotFound errorLevel="error" />
+        <PossibleRawObjectIteration errorLevel="error" />
+        <PropertyNotSetInConstructor errorLevel="error" />
+        <PropertyTypeCoercion errorLevel="error" />
+        <ReservedWord errorLevel="error" />
+        <StringIncrementErrorLevel errorLevel="error" />
+        <TooFewArguments errorLevel="error" />
+        <TooManyArguments errorLevel="error" />
+        <TaintedInput errorLevel="error" />
+        <TaintedSql errorLevel="error" />
+        <TaintedHtml errorLevel="error" />
+        <TaintedTextWithQuotes errorLevel="error" />
+        <TaintedShell errorLevel="error" />
+        <TaintedEval errorLevel="error" />
+        <TaintedSSRF errorLevel="error" />
+        <TaintedLdap errorLevel="error" />
+        <TaintedUnserialize errorLevel="error" />
+        <TaintedCookie errorLevel="error" />
+        <TaintedHeader errorLevel="error" />
+        <TaintedUserSecret errorLevel="error" />
+        <TaintedPassword errorLevel="error" />
+        <TaintedSecret errorLevel="error" />
+        <TaintedCallable errorLevel="error" />
+        <TaintedPath errorLevel="error" />
+        <TaintedSystemSecret errorLevel="error" />
+        <TaintedNumericIdentifier errorLevel="error" />
+        <Trace errorLevel="error" />
+        <UncaughtException errorLevel="error" />
+        <UnrecognizedExpression errorLevel="error" />
+        <UnrecognizedStatement errorLevel="error" />
+        <UnresolvableConstant errorLevel="error" />
+        <UnsupportedPropertyReferenceUsage errorLevel="error" />
+        <UnsupportedReferenceUsage errorLevel="error" />
+        <UnusedBaselineEntry errorLevel="error" />
+        <UnusedClass errorLevel="error" />
+        <UnusedClosureParam errorLevel="error" />
+        <UnusedConstructor errorLevel="error" />
+        <UnusedForeachValue errorLevel="error" />
+        <UnusedFunctionCall errorLevel="error" />
+        <UnusedMethod errorLevel="error" />
+        <UnusedMethodCall errorLevel="error" />
+        <UnusedParam errorLevel="error" />
+        <UnusedProperty errorLevel="error" />
+        <UnusedReturnValue errorLevel="error" />
+        <UnusedVariable errorLevel="error" />
+        <VariableMethod errorLevel="error" />
+        <VariableProperty errorLevel="error" />
+        <WrongKindOfComment errorLevel="error" />
+        <ZeroDivision errorLevel="error" />
+
+        <!-- Подавленные проверки (только если действительно необходимо) -->
         <RiskyTruthyFalsyComparison errorLevel="suppress" />
     </issueHandlers>
+
+    <globals>
+        <!-- Глобальные переменные, если используются -->
+    </globals>
+
+    <extraFiles>
+        <!-- Дополнительные файлы для анализа -->
+    </extraFiles>
+
+    <stubs>
+        <!-- Кастомные stubs для лучшей типизации -->
+    </stubs>
 </psalm>

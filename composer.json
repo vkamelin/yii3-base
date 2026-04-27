@@ -29,11 +29,21 @@
         "cs": "php-cs-fixer fix --dry-run --diff",
         "cs:fix": "php-cs-fixer fix",
         "psalm": "psalm",
+        "psalm:clear-cache": "psalm --clear-cache",
+        "phpstan": "phpstan analyse --configuration phpstan.neon",
+        "phpstan:clear-cache": "phpstan clear-result-cache",
+        "phpstan:generate-baseline": "phpstan analyse",
         "rector": "rector process --dry-run",
+        "rector:fix": "rector process",
         "analyse": [
             "@psalm",
+            "@phpstan",
             "@cs",
             "composer dependency-analyser"
+        ],
+        "analyse:fix": [
+            "@rector:fix",
+            "@cs:fix"
         ]
     },
     "require": {
